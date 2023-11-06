@@ -30,7 +30,8 @@ task qc_check_phb {
     Int? number_contigs 
     Int? n50_value 
     Float? quast_gc_percent
-    String? busco_results
+    Float? checkm2_completeness
+    Float? checkm2_contamination
     # theiaprok only inputs
     String? midas_secondary_genus_abundance 
     Float? ani_highest_percent 
@@ -279,13 +280,16 @@ task qc_check_phb {
             qc_note, qc_status = compare(qc_note, "ani_highest_percent_bases_aligned", float(~{ani_highest_percent_bases_aligned}), ">=", float(taxon_df["ani_highest_percent_bases_aligned"][0]))
             qc_check_metrics.remove("ani_highest_percent_bases_aligned")
 
-        if ("busco_completeness" in qc_check_metrics): # if this var is in the qc_check_metrics,
-          if ("~{busco_results}"): # if busco_results variable exists, quotes are necessary because of invalid syntax error
-            # parse busco_results string into busco completeness value only
-            busco_completeness = "~{busco_results}".split("C:")[1].split("%")[0]
-            qc_note, qc_status = compare(qc_note, "busco_completeness", float(busco_completeness), ">=", float(taxon_df["busco_completeness"][0]))
-            qc_check_metrics.remove("busco_completeness")
+        if ("checkm2_completeness" in qc_check_metrics): # if this var is in the qc_check_metrics,
+          if ("~{checkm2_completeness}"): # if checkm2_completeness variable exists, quotes are necessary because of invalid syntax error
+            qc_note, qc_status = compare(qc_note, "checkm2_completeness", float(checkm2_completeness), ">=", float(taxon_df["checkm2_completeness"][0]))
+            qc_check_metrics.remove("checkm2_completeness")
         
+        if ("checkm2_contamination" in qc_check_metrics): # if this var is in the qc_check_metrics,
+          if ("~{checkm2_contamination}"): # if checkm2_contamination variable exists, quotes are necessary because of invalid syntax error
+            qc_note, qc_status = compare(qc_note, "checkm2_contamination", float(checkm2_contamination), ">=", float(taxon_df["checkm2_contamination"][0]))
+            qc_check_metrics.remove("checkm2_contamination")
+
         if ("num_reads_raw1" in qc_check_metrics): # if this var is in the qc_check_metrics,
           if ("~{num_reads_raw1}"): # if num_reads_raw1 variable exists,
             qc_note, qc_status = compare(qc_note, "num_reads_raw1", int(~{num_reads_raw1}), ">=", int(taxon_df["num_reads_raw1"][0]))

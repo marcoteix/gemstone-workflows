@@ -13,10 +13,10 @@ task checkm2 {
         checkm2 predict --threads 30 --input ~{assembly} --output-directory ~{samplename}
 
         # Parse report
-        while read -r name completedness contamination model translation_table coding_density \
+        while read -r name completeness contamination model translation_table coding_density \
         n50 avg_gene_len genome_size gc total_cds notes
         do
-            echo $completedness > ~{samplename}/completedness.txt
+            echo $completeness > ~{samplename}/completeness.txt
             echo $contamination > ~{samplename}/contamination.txt
             echo $coding_density > ~{samplename}/coding_density.txt
             echo $n50 > ~{samplename}/contig_n50.txt
@@ -31,7 +31,7 @@ task checkm2 {
     >>>
     output {
         File report = "~{samplename}/quality_report.tsv"
-        Float completedness = read_float("~{samplename}/completedness.txt")
+        Float completeness = read_float("~{samplename}/completeness.txt")
         Float contamination = read_float("~{samplename}/contamination.txt")
         Float coding_density = read_float("~{samplename}/coding_density.txt")
         Int contig_n50 = read_int("~{samplename}/contig_n50.txt")

@@ -83,10 +83,10 @@ task export_taxon_tables {
     String? gambit_version
     String? gambit_db_version
     String? gambit_docker
-    String? busco_version
-    String? busco_database
-    String? busco_results
-    File? busco_report
+    String? checkm2_version
+    String? checkm2_completeness
+    String? checkm2_contamination
+    File? checkm2_report
     Float? ani_highest_percent
     Float? ani_highest_percent_bases_aligned 
     File? ani_output_tsv
@@ -255,11 +255,9 @@ task export_taxon_tables {
     File? prokka_gff
     File? prokka_gbk
     File? prokka_sqn
-    String? plasmidfinder_plasmids
-    File? plasmidfinder_results
-    File? plasmidfinder_seqs
-    String? plasmidfinder_docker
-    String? plasmidfinder_db_version
+    File? mob_recon_results
+    String? mob_recon_docker
+    String? mob_recon_version
     String? pbptyper_predicted_1A_2B_2X
     File? pbptyper_pbptype_predicted_tsv 
     String? pbptyper_version 
@@ -440,10 +438,10 @@ task export_taxon_tables {
       "gambit_version": "~{gambit_version}",
       "gambit_db_version": "~{gambit_db_version}",
       "gambit_docker": "~{gambit_docker}",
-      "busco_version": "~{busco_version}",
-      "busco_database": "~{busco_database}",
-      "busco_results": "~{busco_results}",
-      "busco_report": "~{busco_report}",
+      "checkm2_version": "~{checkm2_version}",
+      "checkm2_completeness": "~{checkm2_completeness}",
+      "checkm2_contamination": "~{checkm2_contamination}",
+      "checkm2_report": "~{checkm2_report}",
       "ts_mlst_results": "~{ts_mlst_results}",
       "ts_mlst_predicted_st": "~{ts_mlst_predicted_st}",
       "ts_mlst_pubmlst_scheme": "~{ts_mlst_pubmlst_scheme}",
@@ -612,11 +610,9 @@ task export_taxon_tables {
       "prokka_gff": "~{prokka_gff}",
       "prokka_gbk": "~{prokka_gbk}",
       "prokka_sqn": "~{prokka_sqn}",
-      "plasmidfinder_plasmids": "~{plasmidfinder_plasmids}",
-      "plasmidfinder_results": "~{plasmidfinder_results}",
-      "plasmidfinder_seqs": "~{plasmidfinder_seqs}",
-      "plasmidfinder_docker": "~{plasmidfinder_docker}",
-      "plasmidfinder_db_version": "~{plasmidfinder_db_version}",
+      "mob_recon_results": "~{mob_recon_results}",
+      "mob_recon_docker": "~{mob_recon_docker}",
+      "mob_recon_version": "~{mob_recon_version}",
       "pbptyper_predicted_1A_2B_2X": "~{pbptyper_predicted_1A_2B_2X}",
       "pbptyper_pbptype_predicted_tsv": "~{pbptyper_pbptype_predicted_tsv}",
       "pbptyper_version": "~{pbptyper_version}",

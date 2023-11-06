@@ -6,7 +6,6 @@ import "../../tasks/assembly/task_shovill.wdl" as shovill
 import "../../tasks/quality_control/task_quast.wdl" as quast_task
 import "../../tasks/quality_control/task_cg_pipeline.wdl" as cg_pipeline
 import "../../tasks/quality_control/task_screen.wdl" as screen
-import "../../tasks/quality_control/task_busco.wdl" as busco_task
 import "../../tasks/taxon_id/task_gambit.wdl" as gambit_task
 import "../../tasks/quality_control/task_mummer_ani.wdl" as ani_task
 import "../../tasks/taxon_id/task_kmerfinder.wdl" as kmerfinder_task
@@ -15,13 +14,14 @@ import "../../tasks/gene_typing/task_resfinder.wdl" as resfinder
 import "../../tasks/species_typing/task_ts_mlst.wdl" as ts_mlst_task
 import "../../tasks/gene_typing/task_bakta.wdl" as bakta_task
 import "../../tasks/gene_typing/task_prokka.wdl" as prokka_task
-import "../../tasks/gene_typing/task_plasmidfinder.wdl" as plasmidfinder_task
+import "../../tasks/gene_typing/task_mob_suite.wdl" as mob_suite_task
 import "../../tasks/quality_control/task_qc_check_phb.wdl" as qc_check
 import "../../tasks/task_versioning.wdl" as versioning
 import "../../tasks/utilities/task_broad_terra_tools.wdl" as terra_tools
 import "../../tasks/taxon_id/task_kraken2.wdl" as kraken2
 import "../../tasks/quality_control/task_pilon.wdl" as pilon
 import "../../tasks/alignment/task_bwa.wdl" as bwa
+import "../../tasks/quality_control/task_checkm2.wdl" as checkm2_task
 
 
 workflow theiaprok_illumina_pe {
@@ -162,7 +162,7 @@ workflow theiaprok_illumina_pe {
           assembly = pilon.assembly_fasta,
           samplename = samplename
       }
-      call busco_task.busco {
+      call checkm2_task.checkm2 {
         input:
           assembly = pilon.assembly_fasta,
           samplename = samplename
@@ -214,7 +214,7 @@ workflow theiaprok_illumina_pe {
             samplename = samplename
         }
       }
-      call plasmidfinder_task.plasmidfinder {
+      call mob_suite_task.mob_recon {
         input:
           assembly = pilon.assembly_fasta,
           samplename = samplename
@@ -248,7 +248,8 @@ workflow theiaprok_illumina_pe {
             number_contigs = quast.number_contigs,
             n50_value = quast.n50_value,
             quast_gc_percent = quast.gc_percent,
-            busco_results = busco.busco_results,
+            checkm2_completeness = checkm2.completeness,
+            checkm2_contamination = checkm2.contamination,
             ani_highest_percent = ani.ani_highest_percent,
             ani_highest_percent_bases_aligned = ani.ani_highest_percent_bases_aligned
         }
@@ -321,10 +322,10 @@ workflow theiaprok_illumina_pe {
             gambit_version = gambit.gambit_version,
             gambit_db_version = gambit.gambit_db_version,
             gambit_docker = gambit.gambit_docker,
-            busco_version = busco.busco_version,
-            busco_database = busco.busco_database,
-            busco_results = busco.busco_results,
-            busco_report = busco.busco_report,
+            checkm2_version = checkm2.checkm2_version,
+            checkm2_completeness = checkm2.checkm2_database,
+            checkm2_contamination = checkm2.checkm2_contamination,
+            checkm2_report = checkm2.checkm2_report,
             ani_highest_percent = ani.ani_highest_percent,
             ani_highest_percent_bases_aligned = ani.ani_highest_percent_bases_aligned,
             ani_output_tsv = ani.ani_output_tsv,
@@ -498,11 +499,9 @@ workflow theiaprok_illumina_pe {
             bakta_tsv = bakta.bakta_tsv,
             bakta_summary = bakta.bakta_txt,
             bakta_version = bakta.bakta_version,
-            plasmidfinder_plasmids = plasmidfinder.plasmidfinder_plasmids,
-            plasmidfinder_results = plasmidfinder.plasmidfinder_results,
-            plasmidfinder_seqs = plasmidfinder.plasmidfinder_seqs,
-            plasmidfinder_docker = plasmidfinder.plasmidfinder_docker,
-            plasmidfinder_db_version = plasmidfinder.plasmidfinder_db_version,
+            mob_recon_results = mob_recon.mob_recon_results,
+            mob_recon_docker = mob_recon.mob_recon_docker,
+            mob_recon_version = mob_recon.mob_recon_version,
             pbptyper_predicted_1A_2B_2X = merlin_magic.pbptyper_predicted_1A_2B_2X,
             pbptyper_pbptype_predicted_tsv = merlin_magic.pbptyper_pbptype_predicted_tsv,
             pbptyper_version = merlin_magic.pbptyper_version,
@@ -656,11 +655,11 @@ workflow theiaprok_illumina_pe {
     Float? est_coverage_raw = cg_pipeline_raw.est_coverage
     File? cg_pipeline_report_clean = cg_pipeline_clean.cg_pipeline_report
     Float? est_coverage_clean = cg_pipeline_clean.est_coverage
-    # Assembly QC - busco outputs
-    String? busco_version = busco.busco_version
-    String? busco_database = busco.busco_database
-    String? busco_results = busco.busco_results
-    File? busco_report = busco.busco_report
+    # Assembly QC - checkm2 outputs
+    String? checkm2_version = checkm2.checkm2_version
+    String? checkm2_completeness = checkm2.completeness
+    String? checkm2_contamination = checkm2.checkm2_contamination
+    File? checkm2_report = checkm2.checkm2_report
     # Taxon ID - gambit outputs
     File? gambit_report = gambit.gambit_report_file
     File? gambit_closest_genomes = gambit.gambit_closest_genomes_file
@@ -722,12 +721,10 @@ workflow theiaprok_illumina_pe {
     File? bakta_tsv = bakta.bakta_tsv
     File? bakta_summary = bakta.bakta_txt
     String? bakta_version = bakta.bakta_version
-    # Plasmidfinder Results
-    String? plasmidfinder_plasmids = plasmidfinder.plasmidfinder_plasmids
-    File? plasmidfinder_results = plasmidfinder.plasmidfinder_results
-    File? plasmidfinder_seqs = plasmidfinder.plasmidfinder_seqs
-    String? plasmidfinder_docker = plasmidfinder.plasmidfinder_docker
-    String? plasmidfinder_db_version = plasmidfinder.plasmidfinder_db_version
+    # MOB-recon Results
+    File? mob_recon_results = mob_recon.mob_recon_results
+    String? mob_recon_docker = mob_recon.mob_recon_docker
+    String? mob_recon_version = mob_recon.mob_recon_version
     # QC_Check Results
     String? qc_check = qc_check_task.qc_check
     File? qc_standard = qc_check_task.qc_standard
