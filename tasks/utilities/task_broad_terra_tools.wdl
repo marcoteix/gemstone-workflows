@@ -256,6 +256,9 @@ task export_taxon_tables {
     File? prokka_gbk
     File? prokka_sqn
     File? mob_recon_results
+    File? mob_typer_results
+    File? mob_recon_plasmid_fastas
+    File? mob_recon_chromosome_fasta
     String? mob_recon_docker
     String? mob_recon_version
     String? pbptyper_predicted_1A_2B_2X
@@ -611,6 +614,9 @@ task export_taxon_tables {
       "prokka_gbk": "~{prokka_gbk}",
       "prokka_sqn": "~{prokka_sqn}",
       "mob_recon_results": "~{mob_recon_results}",
+      "mob_typer_results": "~{mob_typer_results}",
+      "mob_recon_plasmid_fastas": "~{mob_recon_plasmid_fastas}",
+      "mob_recon_chromosome_fasta": "~{mob_recon_chromosome_fasta}",
       "mob_recon_docker": "~{mob_recon_docker}",
       "mob_recon_version": "~{mob_recon_version}",
       "pbptyper_predicted_1A_2B_2X": "~{pbptyper_predicted_1A_2B_2X}",

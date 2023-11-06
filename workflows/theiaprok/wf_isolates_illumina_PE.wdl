@@ -500,6 +500,9 @@ workflow theiaprok_illumina_pe {
             bakta_summary = bakta.bakta_txt,
             bakta_version = bakta.bakta_version,
             mob_recon_results = mob_recon.mob_recon_results,
+            mob_typer_results = mob_recon.mob_typer_results,
+            mob_recon_plasmid_fastas = mob_recon.mob_recon_plasmid_fastas,
+            mob_recon_chromosome_fasta = mob_recon.mob_recon_chromosome_fasta,
             mob_recon_docker = mob_recon.mob_recon_docker,
             mob_recon_version = mob_recon.mob_recon_version,
             pbptyper_predicted_1A_2B_2X = merlin_magic.pbptyper_predicted_1A_2B_2X,
@@ -723,6 +726,9 @@ workflow theiaprok_illumina_pe {
     String? bakta_version = bakta.bakta_version
     # MOB-recon Results
     File? mob_recon_results = mob_recon.mob_recon_results
+    File? mob_typer_results = mob_recon.mob_typer_results
+    File? mob_recon_chromosome_fasta = mob_recon.chromosome_fasta
+    Array[File]? mob_recon_plasmid_fastas = mob_recon.plasmid_fastas
     String? mob_recon_docker = mob_recon.mob_recon_docker
     String? mob_recon_version = mob_recon.mob_recon_version
     # QC_Check Results

@@ -28,15 +28,32 @@ task mob_recon {
     # If the assembly FASTA was originally compressed, compress it again
     if $recompress; then
       gzip $assembly
+    fi
 
     # Compress output FASTAs
     for fasta in mob_recon/~{samplename}/*.fasta; do 
       gzip $fasta
     done
+
+    # Write the plasmid FASTA file paths in a text file
+    # to create an output File Array output
+    touch plasmids.txt
+    for plasmid in mob_recon/~{samplename}/plasmid*.fasta.gz; do
+      echo $plasmid >> plasmids.txt
+    done
+
+    # If the mobtyper report file does not exist, create it so that 
+    # the output link does not point to an endless void
+    if [ ! -f mob_recon/~{samplename}/mobtyper_results.txt ]; then
+      touch mob_recon/~{samplename}/mobtyper_results.txt
+    fi
+
   >>>
   output {
     File mob_recon_results = "mob_recon/~{samplename}/contig_report.txt"
+    File mob_typer_results = "mob_recon/~{samplename}/mobtyper_results.txt"
     File chromosome_fasta = "mob_recon/~{samplename}/chromosome.fasta.gz"
+    Array[File] plasmid_fastas = read_lines("plasmids.txt")
     String mob_recon_version = read_string("VERSION.txt")
     String mob_recon_docker = "~{docker}"
   }
