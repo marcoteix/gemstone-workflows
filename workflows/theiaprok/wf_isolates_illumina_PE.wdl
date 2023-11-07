@@ -22,7 +22,9 @@ import "../../tasks/taxon_id/task_kraken2.wdl" as kraken2
 import "../../tasks/quality_control/task_pilon.wdl" as pilon
 import "../../tasks/alignment/task_bwa.wdl" as bwa
 import "../../tasks/quality_control/task_checkm2.wdl" as checkm2_task
-
+import "../../tasks/quality_control/task_taxonomy_qc.wdl" as taxonomy_qc_task
+import "../../tasks/species_typing/task_strainge.wdl" as strainge_task
+import "../../data_types/dt_strainge_db.wdl" as strainge_dt
 
 workflow theiaprok_illumina_pe {
   meta {
@@ -34,6 +36,7 @@ workflow theiaprok_illumina_pe {
     File read1_raw
     File read2_raw
     Int? genome_size
+    String? lab_determined_genus
     # export taxon table parameters
     String? run_id
     String? collection_date
@@ -65,8 +68,18 @@ workflow theiaprok_illumina_pe {
     File? qc_check_table
     # Kraken options
     File kraken2_db
+    # CheckM2 QC options
+    Float contamination_threshold = 0.01
     # StrainGE options
-
+    Int strainge_kmer_size = 23
+    Strainge_db strainge_escherichia_db
+    Strainge_db strainge_pseudomonas_db
+    Strainge_db strainge_proteus_db
+    Strainge_db strainge_klebsiella_db
+    Strainge_db strainge_staphylococcus_db
+    Strainge_db strainge_acinetobacter_db
+    Strainge_db strainge_enterococcus_db
+    Strainge_db strainge_enterobacter_db
   }
   call versioning.version_capture{
     input:
@@ -219,6 +232,14 @@ workflow theiaprok_illumina_pe {
           assembly = pilon.assembly_fasta,
           samplename = samplename
       }
+      call taxonomy_qc_task.taxonomy_qc_check {
+        input:
+          samplename = samplename,
+          gambit_taxonomy = gambit_task.gambit_predicted_taxon,
+          checkm2_contamination = checkm2.contamination,
+          lab_determined_genus = lab_determined_genus,
+          contamination_threshold = contamination_threshold
+      }
       if (defined(qc_check_table)) {
         call qc_check.qc_check_phb as qc_check_task {
           input:
@@ -251,7 +272,8 @@ workflow theiaprok_illumina_pe {
             checkm2_completeness = checkm2.completeness,
             checkm2_contamination = checkm2.contamination,
             ani_highest_percent = ani.ani_highest_percent,
-            ani_highest_percent_bases_aligned = ani.ani_highest_percent_bases_aligned
+            ani_highest_percent_bases_aligned = ani.ani_highest_percent_bases_aligned,
+            qc_taxonomy_flag = taxonomy_qc_check.qc_check
         }
       }
       call merlin_magic_workflow.merlin_magic {
@@ -262,6 +284,7 @@ workflow theiaprok_illumina_pe {
           read1 = read_QC_trim.read1_clean,
           read2 = read_QC_trim.read2_clean
       }
+      # Global QC flag
       if (defined(taxon_tables)) {
         call terra_tools.export_taxon_tables {
           input:
@@ -324,8 +347,8 @@ workflow theiaprok_illumina_pe {
             gambit_docker = gambit.gambit_docker,
             checkm2_version = checkm2.checkm2_version,
             checkm2_completeness = checkm2.checkm2_database,
-            checkm2_contamination = checkm2.checkm2_contamination,
-            checkm2_report = checkm2.checkm2_report,
+            checkm2_contamination = checkm2.contamination,
+            report = checkm2.report,
             ani_highest_percent = ani.ani_highest_percent,
             ani_highest_percent_bases_aligned = ani.ani_highest_percent_bases_aligned,
             ani_output_tsv = ani.ani_output_tsv,
@@ -501,8 +524,8 @@ workflow theiaprok_illumina_pe {
             bakta_version = bakta.bakta_version,
             mob_recon_results = mob_recon.mob_recon_results,
             mob_typer_results = mob_recon.mob_typer_results,
-            mob_recon_plasmid_fastas = mob_recon.mob_recon_plasmid_fastas,
-            mob_recon_chromosome_fasta = mob_recon.mob_recon_chromosome_fasta,
+            mob_recon_plasmid_fastas = mob_recon.plasmid_fastas,
+            mob_recon_chromosome_fasta = mob_recon.chromosome_fasta,
             mob_recon_docker = mob_recon.mob_recon_docker,
             mob_recon_version = mob_recon.mob_recon_version,
             pbptyper_predicted_1A_2B_2X = merlin_magic.pbptyper_predicted_1A_2B_2X,
@@ -573,12 +596,33 @@ workflow theiaprok_illumina_pe {
             srst2_vibrio_biotype = merlin_magic.srst2_vibrio_biotype
         }
       }
-      call kraken2.kraken2_standalone as kraken2_pe {
+      call kraken2.kraken2_standalone as kraken2 {
         input:
           samplename = samplename,
           read1 = read_QC_trim.read1_clean,
           read2 = read_QC_trim.read2_clean,
           kraken2_db = kraken2_db
+      }
+      call strainge_task.select_reference_db {
+        input:
+          samplename = samplename,
+          gambit_taxonomy = gambit.gambit_predicted_taxon,
+          escherichia_db = strainge_escherichia_db,
+          pseudomonas_db = strainge_pseudomonas_db,
+          proteus_db = strainge_proteus_db,
+          klebsiella_db = strainge_klebsiella_db,
+          staphylococcus_db = strainge_staphylococcus_db,
+          acinetobacter_db = strainge_acinetobacter_db,
+          enterococcus_db = strainge_enterococcus_db,
+          enterobacter_db = straingw_enterobacter_db
+      }
+      call strainge_task.StrainGE_PE as strainge {
+        input:
+            samplename = samplename,
+            reads_1 = read_QC_trim.read1_clean,
+            reads_2 = read_QC_trim.read2_clean,
+            kmer_size = strainge_kmer_size,
+            straingst_reference_db = select_reference_db.selected_strainge_db
       }
     }
   }
@@ -661,8 +705,8 @@ workflow theiaprok_illumina_pe {
     # Assembly QC - checkm2 outputs
     String? checkm2_version = checkm2.checkm2_version
     String? checkm2_completeness = checkm2.completeness
-    String? checkm2_contamination = checkm2.checkm2_contamination
-    File? checkm2_report = checkm2.checkm2_report
+    String? checkm2_contamination = checkm2.contamination
+    File? checkm2_report = checkm2.report
     # Taxon ID - gambit outputs
     File? gambit_report = gambit.gambit_report_file
     File? gambit_closest_genomes = gambit.gambit_closest_genomes_file
@@ -731,6 +775,9 @@ workflow theiaprok_illumina_pe {
     Array[File]? mob_recon_plasmid_fastas = mob_recon.plasmid_fastas
     String? mob_recon_docker = mob_recon.mob_recon_docker
     String? mob_recon_version = mob_recon.mob_recon_version
+    # Taxon QC Results
+    String? qc_taxonomy_check = taxonomy_qc_check.qc_check
+    File? qc_taxonomy_report = taxonomy_qc_check.qc_report
     # QC_Check Results
     String? qc_check = qc_check_task.qc_check
     File? qc_standard = qc_check_task.qc_standard
@@ -949,5 +996,28 @@ workflow theiaprok_illumina_pe {
     String? srst2_vibrio_serogroup = merlin_magic.srst2_vibrio_serogroup
     # export taxon table output
     String? taxon_table_status = export_taxon_tables.status
+    # Kraken Results
+    String? kraken2_version = kraken2.kraken2_version
+    String? kraken2_docker = kraken2.kraken2_docker
+    String? kraken2_analysis_date = kraken2.analysis_date
+    File? kraken2_report = kraken2.kraken2_report
+    File? kraken2_classified_report = kraken2.kraken2_classified_report
+    File? kraken2_unclassified_read1 = kraken2.kraken2_unclassified_read1
+    File? kraken2_unclassified_read2 = kraken2.kraken2_unclassified_read2
+    File? kraken2_classified_read1 = kraken2.kraken2_classified_read1
+    File? kraken2_classified_read2 = kraken2.kraken2_classified_read2
+    Float? kraken2_percent_human = kraken2.kraken2_percent_human
+    # StrainGE Results
+    File? straingst_kmerized_reads = strainge.straingst_kmerized_reads
+    File? straingst_reference_db = strainge.straingst_reference_db_used
+    File? straingst_strains = strainge.straingst_strains
+    String? straingst_reference_genus = strainge.straingst_reference_genus_used
+    File? straingst_statistics = strainge.straingst_statistics
+    File? straingr_concat_fasta = strainge.straingr_concat_fasta
+    File? straingr_read_alignment = strainge.straingr_read_alignment
+    File? straingr_variants = strainge.straingr_variants
+    File? straingr_report = strainge.straingr_report
+    String? strainge_docker = strainge.strainge_docker
+    String? strainge_version = strainge.strainge_version
   }
 }

@@ -1,3 +1,5 @@
+version 1.0
+
 task mob_recon {
   input {
     File assembly

@@ -40,7 +40,7 @@ task checkm2 {
         Float gc_content = read_float("~{samplename}/gc_content.txt")
         Int total_cds = read_int("~{samplename}/total_cds.txt")
         String checkm2_docker = docker
-        String version = read_string("~{samplename}/VERSION.txt")
+        String checkm2_version = read_string("~{samplename}/VERSION.txt")
     }
     runtime {
         docker: "~{docker}"

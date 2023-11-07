@@ -53,6 +53,8 @@ task qc_check_phb {
     Float? sc2_s_gene_percent_coverage
     String? vadr_num_alerts
     Int disk_size = 100
+    # Taxonomy QC results
+    String? qc_taxonomy_flag
   }
   command <<<
     python3 <<CODE
@@ -116,7 +118,13 @@ task qc_check_phb {
     # create two empty variables for results to be added to
     qc_status = ""
     qc_note = ""
-    
+
+    # Check taxon QC flag. Set to QC_ALERT if it failed taxon QC
+    if qc_taxonomy_flag == 'QC_ALERT':
+      qc_status = 'QC_ALERT'
+      qc_note = "Failed taxonomic QC, either due to a mismatch between lab and GAMBIT predicted genera or contaminated assembly."
+      print(f"DEBUG: {qc_note}")
+
     # import the qc_check_table into a pandas data frame
     qc_check_df = pd.read_csv("~{qc_check_table}", sep = '\t', index_col = "taxon")
     
@@ -128,7 +136,7 @@ task qc_check_phb {
     gambit_predicted_taxon = "~{gambit_predicted_taxon}"
 
     # check if an expected_taxon or gambit_predicted taxon was detected
-    if (expected_taxon):
+    if (expected_taxon) and (qc_status != 'QC_ALERT'):
       qc_taxon = expected_taxon.replace(" ", "_")
       print("DEBUG: User-provided expected_taxon was found and will be used for QC check")
     elif (gambit_predicted_taxon):
@@ -136,10 +144,10 @@ task qc_check_phb {
       print("DEBUG: No user-provided expected_taxon found; will be using gambit_predicted_taxon for QC check")
     else:
       qc_status = "QC_NA"
-      qc_note = "No expected_taxon or gambit_predicted_taxon was found; qc_check could not proceed"
+      qc_note += "No expected_taxon or gambit_predicted_taxon was found; qc_check could not proceed"
     
     # if a qc_taxon was generated, check to see if that taxon is in the qc_check_table
-    if (qc_status != "QC_NA"):
+    if (qc_status != "QC_NA") and (qc_status != "QC_ALERT"):
       matching_taxon = []
       for taxa in qc_check_taxa:
         if taxa in qc_taxon:
