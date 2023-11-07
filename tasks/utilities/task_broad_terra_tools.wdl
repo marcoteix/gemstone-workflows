@@ -257,7 +257,7 @@ task export_taxon_tables {
     File? prokka_sqn
     File? mob_recon_results
     File? mob_typer_results
-    File? mob_recon_plasmid_fastas
+    Array[File]? mob_recon_plasmid_fastas
     File? mob_recon_chromosome_fasta
     String? mob_recon_docker
     String? mob_recon_version

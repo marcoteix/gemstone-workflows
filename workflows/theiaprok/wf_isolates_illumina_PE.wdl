@@ -24,7 +24,8 @@ import "../../tasks/alignment/task_bwa.wdl" as bwa
 import "../../tasks/quality_control/task_checkm2.wdl" as checkm2_task
 import "../../tasks/quality_control/task_taxonomy_qc.wdl" as taxonomy_qc_task
 import "../../tasks/species_typing/task_strainge.wdl" as strainge_task
-import "../../data_types/dt_strainge_db.wdl" as strainge_dt
+import "../../tasks/species_typing/task_select_strainge_db.wdl" as select_strainge_db_task
+
 
 workflow theiaprok_illumina_pe {
   meta {
@@ -235,7 +236,7 @@ workflow theiaprok_illumina_pe {
       call taxonomy_qc_task.taxonomy_qc_check {
         input:
           samplename = samplename,
-          gambit_taxonomy = gambit_task.gambit_predicted_taxon,
+          gambit_taxonomy = gambit.gambit_predicted_taxon,
           checkm2_contamination = checkm2.contamination,
           lab_determined_genus = lab_determined_genus,
           contamination_threshold = contamination_threshold
@@ -346,9 +347,9 @@ workflow theiaprok_illumina_pe {
             gambit_db_version = gambit.gambit_db_version,
             gambit_docker = gambit.gambit_docker,
             checkm2_version = checkm2.checkm2_version,
-            checkm2_completeness = checkm2.checkm2_database,
+            checkm2_completeness = checkm2.completeness,
             checkm2_contamination = checkm2.contamination,
-            report = checkm2.report,
+            checkm2_report = checkm2.report,
             ani_highest_percent = ani.ani_highest_percent,
             ani_highest_percent_bases_aligned = ani.ani_highest_percent_bases_aligned,
             ani_output_tsv = ani.ani_output_tsv,
@@ -603,7 +604,7 @@ workflow theiaprok_illumina_pe {
           read2 = read_QC_trim.read2_clean,
           kraken2_db = kraken2_db
       }
-      call strainge_task.select_reference_db {
+      call select_strainge_db_task.select_reference_db {
         input:
           samplename = samplename,
           gambit_taxonomy = gambit.gambit_predicted_taxon,
@@ -614,7 +615,7 @@ workflow theiaprok_illumina_pe {
           staphylococcus_db = strainge_staphylococcus_db,
           acinetobacter_db = strainge_acinetobacter_db,
           enterococcus_db = strainge_enterococcus_db,
-          enterobacter_db = straingw_enterobacter_db
+          enterobacter_db = strainge_enterobacter_db
       }
       call strainge_task.StrainGE_PE as strainge {
         input:
