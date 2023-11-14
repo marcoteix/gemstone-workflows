@@ -119,6 +119,8 @@ task qc_check_phb {
     qc_status = ""
     qc_note = ""
 
+    qc_taxonomy_flag = "~{qc_taxonomy_flag}"
+
     # Check taxon QC flag. Set to QC_ALERT if it failed taxon QC
     if qc_taxonomy_flag == 'QC_ALERT':
       qc_status = 'QC_ALERT'
@@ -425,6 +427,59 @@ task qc_check_phb {
     disks: "local-disk " + disk_size + " SSD"
     disk: disk_size + " GB"
    # maxRetries: 3
+    preemptible: 0
+  }
+}
+
+task qc_flags_check {
+    input {
+      String qc_taxonomy_flag = ""
+      String? qc_check_table_flag = ""
+      String qc_clean_reads_flag = ""
+  }
+  command <<<
+    python3 <<CODE
+
+    qc_taxonomy_flag = "~{qc_taxonomy_flag}"
+    qc_check_table_flag = "~{qc_check_table_flag}"
+    qc_clean_reads_flag = "~{qc_clean_reads_flag}"
+
+    # create two empty variables for results to be added to
+    qc_status = 'QC_PASS'
+    qc_note = []
+
+    # Check taxon QC flag. Set to QC_ALERT if it failed taxon QC
+    if qc_taxonomy_flag == 'QC_ALERT':
+      qc_status = 'QC_ALERT'
+      qc_note += ["Failed taxonomic QC, either due to a mismatch between lab and GAMBIT predicted genera or contaminated assembly."]
+      print(f"DEBUG: {qc_note[-1]}")
+    if qc_check_table_flag == 'QC_ALERT':
+      qc_status = 'QC_ALERT'
+      qc_note += ["Failed user-defined QC check (defined using a QC table)."]
+      print(f"DEBUG: {qc_note[-1]}")
+    if qc_clean_reads_flag == 'FAIL':
+      qc_status = 'QC_ALERT'
+      qc_note += ["Failed clean reads QC check."]
+      print(f"DEBUG: {qc_note[-1]}")
+    
+    with open("QC_CHECK", 'wt') as out:
+      out.write(qc_check)
+    with open("QC_NOTE", "wt") as out:
+      out.write("\n".join(qc_note))
+      
+    CODE
+
+  >>>
+  output {
+    String qc_check = read_string("QC_CHECK")
+    String qc_note = read_string("QC_NOTE")
+  }
+  runtime {
+    docker: "us-docker.pkg.dev/general-theiagen/theiagen/terra-tools:2023-03-16"
+    memory: "4 GB"
+    cpu: 1
+    disks: "local-disk 4 SSD"
+    disk: "4 GB"
     preemptible: 0
   }
 }

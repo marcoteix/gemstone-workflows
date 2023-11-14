@@ -68,7 +68,7 @@ workflow theiaprok_illumina_pe {
     String? expected_taxon  # allow user to provide organism (e.g. "Clostridioides_difficile") string to amrfinder. Useful when gambit does not predict the correct species    # qc check parameters
     File? qc_check_table
     # Kraken options
-    File kraken2_db
+    String kraken2_db = "/kraken2-db"
     # CheckM2 QC options
     Float contamination_threshold = 0.01
     # StrainGE options
@@ -275,6 +275,21 @@ workflow theiaprok_illumina_pe {
             ani_highest_percent = ani.ani_highest_percent,
             ani_highest_percent_bases_aligned = ani.ani_highest_percent_bases_aligned,
             qc_taxonomy_flag = taxonomy_qc_check.qc_check
+        }
+        # Merge QC flags
+        call qc_check.qc_flags_check {
+          input:
+            qc_taxonomy_flag = taxonomy_qc_check.qc_check,
+            qc_check_table_flag = qc_check_task.qc_check,
+            qc_clean_reads_flag = clean_check_reads.read_screen
+        }
+      } 
+      if (!(defined(qc_check_table))) {
+        # Merge QC flags
+        call qc_check.qc_flags_check {
+          input:
+            qc_taxonomy_flag = taxonomy_qc_check.qc_check,
+            qc_clean_reads_flag = clean_check_reads.read_screen
         }
       }
       call merlin_magic_workflow.merlin_magic {
@@ -625,6 +640,13 @@ workflow theiaprok_illumina_pe {
             kmer_size = strainge_kmer_size,
             straingst_reference_db = select_reference_db.selected_strainge_db
       }
+    } 
+    if (!(clean_check_reads.read_screen == "PASS")) {
+      # Merge QC flags
+      call qc_check.qc_flags_check {
+        input:
+          qc_clean_reads_flag = clean_check_reads.read_screen
+      }
     }
   }
   output {
@@ -780,8 +802,10 @@ workflow theiaprok_illumina_pe {
     String? qc_taxonomy_check = taxonomy_qc_check.qc_check
     File? qc_taxonomy_report = taxonomy_qc_check.qc_report
     # QC_Check Results
-    String? qc_check = qc_check_task.qc_check
-    File? qc_standard = qc_check_task.qc_standard
+    String? read_and_table_qc_check = qc_check_task.qc_check
+    File? read_and_table_qc_standard = qc_check_task.qc_standard
+    String? qc_check = qc_flags_check.qc_check
+    String? qc_note = qc_flags_check.qc_note
     # Ecoli Typing
     File? serotypefinder_report = merlin_magic.serotypefinder_report
     String? serotypefinder_docker = merlin_magic.serotypefinder_docker

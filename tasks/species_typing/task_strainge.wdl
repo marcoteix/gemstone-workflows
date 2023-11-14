@@ -4,7 +4,7 @@ struct Strainge_db {
   String genus
   File hdf5
   Array[File] fastas # Path to all FASTA files. Forces Cromwell to mount these files when running the task
-  File fastas_dir # Directory containing all reference FASTA files
+  String fastas_dir # Directory containing all reference FASTA files
   File similarities
 }
 
