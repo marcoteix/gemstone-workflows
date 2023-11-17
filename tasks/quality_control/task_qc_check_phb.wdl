@@ -463,7 +463,7 @@ task qc_flags_check {
       print(f"DEBUG: {qc_note[-1]}")
     
     with open("QC_CHECK", 'wt') as out:
-      out.write(qc_check)
+      out.write(qc_status)
     with open("QC_NOTE", "wt") as out:
       out.write("\n".join(qc_note))
       

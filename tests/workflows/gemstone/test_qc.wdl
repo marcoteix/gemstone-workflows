@@ -16,21 +16,14 @@ workflow test_qc {
         Int cpu = 2
         Int disk_size = 16
         Float contamination_threshold = 0.01
+        Float checkm2_contamination = 0.001
     }
     if (read_qc_flag == "PASS") {
-        call checkm2_task.checkm2 {
-            input:
-                assembly = assembly,
-                samplename = samplename,
-                disk_size = disk_size,
-                memory = mem,
-                cpu = cpu
-        }
         call taxonomy_qc_task.taxonomy_qc_check {
             input:
                 samplename = samplename,
                 gambit_taxonomy = gambit_taxonomy,
-                checkm2_contamination = checkm2.contamination,
+                checkm2_contamination = checkm2_contamination,
                 lab_determined_genus = lab_determined_genus,
                 contamination_threshold = contamination_threshold
         }

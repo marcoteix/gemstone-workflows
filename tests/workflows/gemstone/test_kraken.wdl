@@ -4,7 +4,7 @@ import "../../../tasks/taxon_id/task_kraken2.wdl" as kraken2
 
 workflow test_kraken {
     input {
-        String kraken2_db = "/kraken2-db"
+        String kraken2_db
         File read1_raw
         File read2_raw
         String samplename = "test_sample"

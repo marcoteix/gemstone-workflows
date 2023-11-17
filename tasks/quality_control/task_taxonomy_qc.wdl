@@ -17,7 +17,7 @@ task taxonomy_qc_check {
         checkm2_contamination = ~{checkm2_contamination}
         gambit_taxonomy = "~{gambit_taxonomy}"
         contamination_threshold = ~{contamination_threshold}
-        samplename = ~{samplename}
+        samplename = "~{samplename}"
 
         # Take the genus from the taxonomy predictions
         valid_lab_genus = True

@@ -10,21 +10,14 @@ task checkm2 {
         Int disk_size = 100
     }
     command <<<
-        checkm2 predict --threads 30 --input ~{assembly} --output-directory ~{samplename}
+        checkm2 predict --threads 4 --tmpdir /tmp/ --input ~{assembly} --output-directory ~{samplename} --lowmem
 
         # Parse report
-        while read -r name completeness contamination model translation_table coding_density \
-        n50 avg_gene_len genome_size gc total_cds notes
+        while read -r name completeness contamination others
         do
             echo $completeness > ~{samplename}/completeness.txt
             echo $contamination > ~{samplename}/contamination.txt
-            echo $coding_density > ~{samplename}/coding_density.txt
-            echo $n50 > ~{samplename}/contig_n50.txt
-            echo $avg_gene_len > ~{samplename}/avg_gene_len.txt
-            echo $genome_size > ~{samplename}/genome_size.txt
-            echo $gc > ~{samplename}/gc_content.txt
-            echo $total_cds > ~{samplename}/total_cds.txt
-        done
+        done < ~{samplename}/quality_report.tsv
 
         # versioning
         checkm2 --version > ~{samplename}/VERSION.txt
@@ -33,12 +26,6 @@ task checkm2 {
         File report = "~{samplename}/quality_report.tsv"
         Float completeness = read_float("~{samplename}/completeness.txt")
         Float contamination = read_float("~{samplename}/contamination.txt")
-        Float coding_density = read_float("~{samplename}/coding_density.txt")
-        Int contig_n50 = read_int("~{samplename}/contig_n50.txt")
-        Float avg_gene_len = read_float("~{samplename}/avg_gene_len.txt")
-        Int genome_size = read_int("~{samplename}/genome_size.txt")
-        Float gc_content = read_float("~{samplename}/gc_content.txt")
-        Int total_cds = read_int("~{samplename}/total_cds.txt")
         String checkm2_docker = docker
         String checkm2_version = read_string("~{samplename}/VERSION.txt")
     }

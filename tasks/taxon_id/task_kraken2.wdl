@@ -42,7 +42,6 @@ task kraken2_theiacov {
       percent_target_org=""
     fi
     echo $percent_target_org | tee PERCENT_TARGET_ORG
-
   >>>
   output {
     String date = read_string("DATE")
@@ -69,15 +68,18 @@ task kraken2_standalone {
   input {
     File read1
     File? read2
-    File kraken2_db
+    File kraken2_db # as a tar.gz file
     String samplename
-    String docker = "us-docker.pkg.dev/general-theiagen/staphb/kraken2:2.1.2-no-db"
+    String docker = "marcoteix/bracken:0.0.1"
     String kraken2_args = ""
     String classified_out = "classified#.fastq"
     String unclassified_out = "unclassified#.fastq"
     Int mem = 32
     Int cpu = 4
     Int disk_size = 100
+    Int bracken_read_len = 150
+    String bracken_classification_level = "G"
+    Int bracken_min_reads = 10
   }
   command <<<
     echo $(kraken2 --version 2>&1) | sed 's/^.*Kraken version //;s/ .*$//' | tee VERSION
@@ -88,8 +90,10 @@ task kraken2_standalone {
     tar -C ./db/ -xzvf ~{kraken2_db}  
 
     # determine if paired-end or not
-    if ! [ -z ~{read2} ]; then
       mode="--paired"
+      mode="--paired"
+    fi
+    mode="--paired"
     fi
 
     # Run Kraken2
@@ -121,6 +125,10 @@ task kraken2_standalone {
       mv "~{samplename}.unclassified#.fastq.gz" ~{samplename}.unclassified_1.fastq.gz
     fi
 
+    # Run bracken
+    bracken -d ./db/ -i ~{samplename}.report.txt -o ~{samplename}.bracken.txt \
+      -r ~{bracken_read_len} -l ~{bracken_classification_level} -t ~{bracken_min_reads}
+
   >>>
   output {
     String kraken2_version = read_string("VERSION")
@@ -133,6 +141,7 @@ task kraken2_standalone {
     File kraken2_classified_read1 = "~{samplename}.classified_1.fastq.gz"
     Float kraken2_percent_human = read_float("PERCENT_HUMAN")
     File? kraken2_classified_read2 = "~{samplename}.classified_2.fastq.gz"
+    File bracken_report = "~{samplename}.bracken.txt"
   }
   runtime {
       docker: "~{docker}"

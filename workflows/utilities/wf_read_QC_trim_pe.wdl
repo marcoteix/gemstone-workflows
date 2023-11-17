@@ -137,18 +137,6 @@ workflow read_QC_trim_pe {
     String fastq_scan_version = fastq_scan_raw.version
     String fastq_scan_docker = fastq_scan_raw.fastq_scan_docker
     
-    # kraken2
-    String? kraken_version = kraken2_theiacov_raw.version
-    Float? kraken_human =  kraken2_theiacov_raw.percent_human
-    Float? kraken_sc2 = kraken2_theiacov_raw.percent_sc2
-    String? kraken_target_org = kraken2_theiacov_raw.percent_target_org
-    File? kraken_report = kraken2_theiacov_raw.kraken_report
-    Float? kraken_human_dehosted = kraken2_theiacov_dehosted.percent_human
-    Float? kraken_sc2_dehosted = kraken2_theiacov_dehosted.percent_sc2
-    String? kraken_target_org_dehosted = kraken2_theiacov_dehosted.percent_target_org
-    String? kraken_target_org_name = target_org
-    File? kraken_report_dehosted = kraken2_theiacov_dehosted.kraken_report
-    
     # trimming versioning
     String? trimmomatic_version = trimmomatic_pe.version
     String? trimmomatic_docker = trimmomatic_pe.trimmomatic_docker

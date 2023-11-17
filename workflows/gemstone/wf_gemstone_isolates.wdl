@@ -27,9 +27,9 @@ import "../../tasks/species_typing/task_strainge.wdl" as strainge_task
 import "../../tasks/species_typing/task_select_strainge_db.wdl" as select_strainge_db_task
 
 
-workflow theiaprok_illumina_pe {
+workflow gemstone_isolates {
   meta {
-    description: "De-novo genome assembly, taxonomic ID, and QC of paired-end bacterial NGS data"
+    description: "Pipeline for bacterial isolates, based on the TheiaProk workflow by Theiagen."
   }
   input {
     String samplename
@@ -70,17 +70,10 @@ workflow theiaprok_illumina_pe {
     # Kraken options
     String kraken2_db = "/kraken2-db"
     # CheckM2 QC options
-    Float contamination_threshold = 0.01
+    Float contamination_threshold = 1
     # StrainGE options
     Int strainge_kmer_size = 23
-    Strainge_db strainge_escherichia_db
-    Strainge_db strainge_pseudomonas_db
-    Strainge_db strainge_proteus_db
-    Strainge_db strainge_klebsiella_db
-    Strainge_db strainge_staphylococcus_db
-    Strainge_db strainge_acinetobacter_db
-    Strainge_db strainge_enterococcus_db
-    Strainge_db strainge_enterobacter_db
+    Array[File] strainge_dbs
   }
   call versioning.version_capture{
     input:
@@ -277,21 +270,8 @@ workflow theiaprok_illumina_pe {
             qc_taxonomy_flag = taxonomy_qc_check.qc_check
         }
         # Merge QC flags
-        call qc_check.qc_flags_check {
-          input:
-            qc_taxonomy_flag = taxonomy_qc_check.qc_check,
-            qc_check_table_flag = qc_check_task.qc_check,
-            qc_clean_reads_flag = clean_check_reads.read_screen
-        }
+
       } 
-      if (!(defined(qc_check_table))) {
-        # Merge QC flags
-        call qc_check.qc_flags_check {
-          input:
-            qc_taxonomy_flag = taxonomy_qc_check.qc_check,
-            qc_clean_reads_flag = clean_check_reads.read_screen
-        }
-      }
       call merlin_magic_workflow.merlin_magic {
         input:
           merlin_tag = select_first([expected_taxon, gambit.merlin_tag]),
@@ -623,30 +603,22 @@ workflow theiaprok_illumina_pe {
         input:
           samplename = samplename,
           gambit_taxonomy = gambit.gambit_predicted_taxon,
-          escherichia_db = strainge_escherichia_db,
-          pseudomonas_db = strainge_pseudomonas_db,
-          proteus_db = strainge_proteus_db,
-          klebsiella_db = strainge_klebsiella_db,
-          staphylococcus_db = strainge_staphylococcus_db,
-          acinetobacter_db = strainge_acinetobacter_db,
-          enterococcus_db = strainge_enterococcus_db,
-          enterobacter_db = strainge_enterobacter_db
+          strainge_dbs = strainge_dbs
       }
-      call strainge_task.StrainGE_PE as strainge {
+      call strainge_task.strainge {
         input:
             samplename = samplename,
             reads_1 = read_QC_trim.read1_clean,
             reads_2 = read_QC_trim.read2_clean,
             kmer_size = strainge_kmer_size,
-            straingst_reference_db = select_reference_db.selected_strainge_db
+            strainge_db = strainge_dbs[select_reference_db.selected_db]
       }
     } 
-    if (!(clean_check_reads.read_screen == "PASS")) {
-      # Merge QC flags
-      call qc_check.qc_flags_check {
-        input:
-          qc_clean_reads_flag = clean_check_reads.read_screen
-      }
+    call qc_check.qc_flags_check {
+      input:
+        qc_taxonomy_flag = taxonomy_qc_check.qc_check,
+        qc_check_table_flag = qc_check_task.qc_check,
+        qc_clean_reads_flag = clean_check_reads.read_screen
     }
   }
   output {
@@ -1032,11 +1004,11 @@ workflow theiaprok_illumina_pe {
     File? kraken2_classified_read1 = kraken2.kraken2_classified_read1
     File? kraken2_classified_read2 = kraken2.kraken2_classified_read2
     Float? kraken2_percent_human = kraken2.kraken2_percent_human
+    File? bracken_report = kraken2.bracken_report
     # StrainGE Results
     File? straingst_kmerized_reads = strainge.straingst_kmerized_reads
-    File? straingst_reference_db = strainge.straingst_reference_db_used
+    String? straingst_reference_db = strainge.straingst_reference_db_used
     File? straingst_strains = strainge.straingst_strains
-    String? straingst_reference_genus = strainge.straingst_reference_genus_used
     File? straingst_statistics = strainge.straingst_statistics
     File? straingr_concat_fasta = strainge.straingr_concat_fasta
     File? straingr_read_alignment = strainge.straingr_read_alignment
