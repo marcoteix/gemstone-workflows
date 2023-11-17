@@ -3,5 +3,3 @@ workflows:
  - name: GEMSTONE_Isolates_Illumina_PE
    subclass: WDL
    primaryDescriptorPath: /workflows/gemstone/wf_gemstone_isolates.wdl
-   testParameterFiles:
-    - empty.json
