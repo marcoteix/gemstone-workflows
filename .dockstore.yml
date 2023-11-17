@@ -1,4 +1,4 @@
-version: 1.0
+version: 1.2
 workflows:
  - name: GEMSTONE_Isolates_Illumina_PE
    subclass: WDL
