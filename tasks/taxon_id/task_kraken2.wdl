@@ -89,12 +89,7 @@ task kraken2_standalone {
     mkdir db
     tar -C ./db/ -xzvf ~{kraken2_db}  
 
-    # determine if paired-end or not
-      mode="--paired"
-      mode="--paired"
-    fi
     mode="--paired"
-    fi
 
     # Run Kraken2
     kraken2 $mode \
