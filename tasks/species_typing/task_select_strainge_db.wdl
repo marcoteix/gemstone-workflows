@@ -86,7 +86,7 @@ task select_reference_db {
       rmdir databases/fasta
       rm databases/*
       echo $(date) - Analyzing the next database...
-      counter=$counter + 1
+      counter=$(($counter + 1))
     done
 
     echo $(date) - Done!
