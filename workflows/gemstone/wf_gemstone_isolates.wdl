@@ -68,7 +68,7 @@ workflow gemstone_isolates {
     String? expected_taxon  # allow user to provide organism (e.g. "Clostridioides_difficile") string to amrfinder. Useful when gambit does not predict the correct species    # qc check parameters
     File? qc_check_table
     # Kraken options
-    String kraken2_db = "/kraken2-db"
+    File kraken2_db
     # CheckM2 QC options
     Float contamination_threshold = 1
     # StrainGE options
