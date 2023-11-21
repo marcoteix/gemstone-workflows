@@ -3,3 +3,9 @@ workflows:
  - name: GEMSTONE_Isolates_Illumina_PE
    subclass: WDL
    primaryDescriptorPath: /workflows/gemstone/wf_gemstone_isolates.wdl
+ - name: Kraken2_Bracken_PE
+   subclass: WDL
+   primaryDescriptorPath: /workflows/standalone_modules/wf_kraken2_pe.wdl
+ - name: StrainGE_PE
+   subclass: WDL
+   primaryDescriptorPath: /workflows/standalone_modules/wf_strainge_pe.wdl
