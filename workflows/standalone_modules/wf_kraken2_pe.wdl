@@ -5,20 +5,32 @@ import "../../tasks/task_versioning.wdl" as versioning
 
 workflow kraken2_pe_wf {
   meta {
-    description: "Classify paired-end reads using Kraken2"
+    description: "Classify paired-end reads using Kraken2. Estimate abundances with Bracken."
   }
   input {
     String samplename
     File read1
     File read2
     File kraken2_db
+    Int bracken_read_len = 150
+    String bracken_classification_level = "G"
+    Int bracken_min_reads = 10
+    Int kraken2_mem = 32
+    Int kraken2_cpu = 4
+    Int kraken2_disk_size = 100
   }
   call kraken2.kraken2_standalone as kraken2_pe {
     input:
       samplename = samplename,
       read1 = read1,
       read2 = read2,
-      kraken2_db = kraken2_db
+      kraken2_db = kraken2_db,
+      mem = kraken2_mem,
+      cpu = kraken2_cpu,
+      disk_size = kraken2_disk_size,
+      bracken_read_len = bracken_read_len,
+      bracken_classification_level = bracken_classification_level,
+      bracken_min_reads = bracken_min_reads
   }
   call versioning.version_capture{
     input:
@@ -33,8 +45,11 @@ workflow kraken2_pe_wf {
     File kraken2_report = kraken2_pe.kraken2_report
     File kraken2_classified_report = kraken2_pe.kraken2_classified_report
     File kraken2_unclassified_read1 = kraken2_pe.kraken2_unclassified_read1
-    File kraken2_unclassified_read2 = select_first([kraken2_pe.kraken2_unclassified_read2])
+    File? kraken2_unclassified_read2 = select_first([kraken2_pe.kraken2_unclassified_read2])
     File kraken2_classified_read1 = kraken2_pe.kraken2_classified_read1
-    File kraken2_classified_read2 = select_first([kraken2_pe.kraken2_classified_read2])
+    File? kraken2_classified_read2 = select_first([kraken2_pe.kraken2_classified_read2])
+    Float kraken2_percent_human = read_float("PERCENT_HUMAN")
+    File bracken_report = "~{samplename}.bracken.txt"
+    String bracken_version = read_string("BRACKEN_VERSION")
   }
 }

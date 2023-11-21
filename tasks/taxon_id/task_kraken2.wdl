@@ -82,7 +82,7 @@ task kraken2_standalone {
     Int bracken_min_reads = 10
   }
   command <<<
-    echo $(kraken2 --version 2>&1) | sed 's/^.*Kraken version //;s/ .*$//' | tee VERSION
+    echo $(kraken2 --version 2>&1) | sed 's/^.*Kraken version //;s/ .*$//' | tee KRAKEN_VERSION
     date | tee DATE
 
     # Decompress the Kraken2 database
@@ -121,12 +121,13 @@ task kraken2_standalone {
     fi
 
     # Run bracken
+    bracken -v | cut -d ' ' -f2 > BRACKEN_VERSION
     bracken -d ./db/ -i ~{samplename}.report.txt -o ~{samplename}.bracken.txt \
       -r ~{bracken_read_len} -l ~{bracken_classification_level} -t ~{bracken_min_reads}
 
   >>>
   output {
-    String kraken2_version = read_string("VERSION")
+    String kraken2_version = read_string("KRAKEN_VERSION")
     String kraken2_docker = docker
     String analysis_date = read_string("DATE")
     File kraken2_report = "~{samplename}.report.txt"
@@ -137,6 +138,7 @@ task kraken2_standalone {
     Float kraken2_percent_human = read_float("PERCENT_HUMAN")
     File? kraken2_classified_read2 = "~{samplename}.classified_2.fastq.gz"
     File bracken_report = "~{samplename}.bracken.txt"
+    String bracken_version = read_string("BRACKEN_VERSION")
   }
   runtime {
       docker: "~{docker}"
