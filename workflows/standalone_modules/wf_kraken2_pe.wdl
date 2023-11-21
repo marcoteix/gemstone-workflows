@@ -44,12 +44,12 @@ workflow kraken2_pe_wf {
     String kraken2_docker = kraken2_pe.kraken2_docker
     File kraken2_report = kraken2_pe.kraken2_report
     File kraken2_classified_report = kraken2_pe.kraken2_classified_report
-    File kraken2_unclassified_read1 = kraken2_pe.kraken2_unclassified_read1
-    File? kraken2_unclassified_read2 = select_first([kraken2_pe.kraken2_unclassified_read2])
-    File kraken2_classified_read1 = kraken2_pe.kraken2_classified_read1
-    File? kraken2_classified_read2 = select_first([kraken2_pe.kraken2_classified_read2])
-    Float kraken2_percent_human = read_float("PERCENT_HUMAN")
-    File bracken_report = "~{samplename}.bracken.txt"
-    String bracken_version = read_string("BRACKEN_VERSION")
+    File? kraken2_unclassified_read1 = kraken2_pe.kraken2_unclassified_read1
+    File? kraken2_unclassified_read2 = kraken2_pe.kraken2_unclassified_read2
+    File? kraken2_classified_read1 = kraken2_pe.kraken2_classified_read1
+    File? kraken2_classified_read2 = kraken2_pe.kraken2_classified_read2
+    Float kraken2_percent_human = kraken2_pe.kraken2_percent_human
+    File bracken_report = kraken2_pe.bracken_report
+    String bracken_version = kraken2_pe.bracken_version
   }
 }
