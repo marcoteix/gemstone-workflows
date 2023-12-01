@@ -16,7 +16,7 @@ workflow strainge_isolates_pe_wf {
     Int db_kmer_size = 23
     Int strainge_disk_size = 100
     Int strainge_cpus = 4
-    Int strainge_memory = 16
+    Int strainge_memory = 64
   }
   call select_db.select_reference_db {
     input:
