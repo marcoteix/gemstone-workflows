@@ -41,7 +41,7 @@ task select_reference_db {
     String samplename
     String gambit_taxonomy
     Array [File] strainge_dbs  # Must be filenames of the type [genus].tar.gz
-    Int disk_size = 64
+    Int disk_size = 128
   }
   command <<<
 
