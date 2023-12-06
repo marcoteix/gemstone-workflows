@@ -17,7 +17,7 @@ workflow kraken2_pe_wf {
     Int bracken_min_reads = 10
     Int kraken2_mem = 32
     Int kraken2_cpu = 4
-    Int kraken2_disk_size = 100
+    Int kraken2_disk_size = 256
   }
   call kraken2.kraken2_standalone as kraken2_pe {
     input:

@@ -172,7 +172,7 @@ task strainge {
     # Decompress reference database
     mkdir database
     tar -C ./database/ -xzvf ~{strainge_db}
-    fastas_dir="database/fasta"
+    fastas_dir="database/FASTA"
     similarities="database/similarities.tsv"
     hdf5=$(dir database/*.hdf5)
     echo $hdf5 > ~{samplename}_reference_used.txt
