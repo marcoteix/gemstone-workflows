@@ -45,5 +45,6 @@ workflow strainge_isolates_pe_wf {
     File straingr_variants = strainge_isolate.straingr_variants
     File straingr_report = strainge_isolate.straingr_report
     String strainge_docker = strainge_isolate.strainge_docker
+    String strainge_version = strainge_isolate.strainge_version
   }
 }

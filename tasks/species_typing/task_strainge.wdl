@@ -197,7 +197,8 @@ task strainge {
     File straingr_read_alignment = "~{samplename}_straingr_alignment.bam"
     File straingr_variants = "~{samplename}_straingr_variants.hdf5"
     File straingr_report = "~{samplename}_straingr.tsv"
-    String strainge_docker = "~{docker}"    String strainge_version = read_string("VERSION.txt")
+    String strainge_docker = "~{docker}"    
+    String strainge_version = read_string("VERSION.txt")
   }
   runtime {
     docker: "~{docker}"
