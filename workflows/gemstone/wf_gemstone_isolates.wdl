@@ -17,7 +17,6 @@ import "../../tasks/gene_typing/task_prokka.wdl" as prokka_task
 import "../../tasks/gene_typing/task_mob_suite.wdl" as mob_suite_task
 import "../../tasks/quality_control/task_qc_check_phb.wdl" as qc_check
 import "../../tasks/task_versioning.wdl" as versioning
-import "../../tasks/utilities/task_broad_terra_tools.wdl" as terra_tools
 import "../../tasks/taxon_id/task_kraken2.wdl" as kraken2
 import "../../tasks/quality_control/task_pilon.wdl" as pilon
 import "../../tasks/alignment/task_bwa.wdl" as bwa
@@ -25,7 +24,7 @@ import "../../tasks/quality_control/task_checkm2.wdl" as checkm2_task
 import "../../tasks/quality_control/task_taxonomy_qc.wdl" as taxonomy_qc_task
 import "../../tasks/species_typing/task_strainge.wdl" as strainge_task
 import "../../tasks/species_typing/task_select_strainge_db.wdl" as select_strainge_db_task
-
+import "../../tasks/utilities/task_broad_terra_tools.wdl" as terra_tools
 
 workflow gemstone_isolates {
   meta {
