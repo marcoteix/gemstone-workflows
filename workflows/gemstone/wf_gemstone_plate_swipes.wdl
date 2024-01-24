@@ -10,8 +10,7 @@ import "../../tasks/task_versioning.wdl" as versioning
 import "../../tasks/gene_typing/task_mob_suite.wdl" as mob_suite_task
 import "../../tasks/gene_typing/task_bakta.wdl" as bakta_task
 import "../../tasks/gene_typing/task_amrfinderplus.wdl" as amrfinderplus
-import "../../tasks/species_typing/task_strainge.wdl" as strainge_task
-import "../../tasks/species_typing/task_select_strainge_db.wdl" as select_strainge_db_task
+import "../standalone_modules/wf_strainge_pe.wdl" as strainge_wf
 
 workflow gemstone_plate_swipes {
   meta {
@@ -26,7 +25,8 @@ workflow gemstone_plate_swipes {
     Boolean output_additional_files = false
     # StrainGE options
     Boolean call_strainge = false
-    Array[File] strainge_dbs
+    File strainge_db_config
+    Int strainge_max_strains = 5
     Int strainge_disk_size = 100
     Int strainge_cpus = 4
     Int strainge_memory = 128
@@ -153,22 +153,18 @@ workflow gemstone_plate_swipes {
       samplename = samplename
   }
   if (call_strainge) {
-    call select_strainge_db_task.select_reference_db {
+    call strainge_wf.strainge_pe_wf as strainge {
       input:
         samplename = samplename,
-        gambit_taxonomy = lab_determined_genus,
-        strainge_dbs = strainge_dbs
-    }
-    call strainge_task.strainge {
-      input:
-        samplename = samplename,
-        reads_1 = read_QC_trim.read1_clean,
-        reads_2 = read_QC_trim.read2_clean,
-        kmer_size = strainge_db_kmer_size,
-        strainge_db = strainge_dbs[select_reference_db.selected_db],
-        disk_size = strainge_disk_size,
-        cpus = strainge_cpus,
-        memory = strainge_memory
+        read1 = read_QC_trim.read1_clean,
+        read2 = read_QC_trim.read2_clean,
+        strainge_db_kmer_size = strainge_db_kmer_size,
+        strainge_disk_size = strainge_disk_size,
+        strainge_cpus = strainge_cpus,
+        strainge_memory = strainge_memory,
+        strainge_max_strains = strainge_max_strains,
+        strainge_db_config = strainge_db_config,
+        predicted_taxonomy = lab_determined_genus
     }
   }
   call versioning.version_capture{
@@ -239,7 +235,8 @@ workflow gemstone_plate_swipes {
     Float? percentage_mapped_reads = assembled_reads_percent.percentage_mapped
     # StrainGE outputs
     File? straingst_kmerized_reads = strainge.straingst_kmerized_reads
-    String? straingst_reference_db_used = strainge.straingst_reference_db_used
+    File? straingst_selected_db = strainge.straingst_selected_db
+    Boolean? straingst_found_db = strainge.straingst_found_db
     File? straingst_strains = strainge.straingst_strains
     File? straingst_statistics = strainge.straingst_statistics
     File? straingr_concat_fasta = strainge.straingr_concat_fasta

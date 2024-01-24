@@ -9,3 +9,6 @@ workflows:
  - name: StrainGE_PE
    subclass: WDL
    primaryDescriptorPath: /workflows/standalone_modules/wf_strainge_pe.wdl
+ - name: GEMSTONE_Plate_Swipes_Illumina_PE
+   subclass: WDL
+   primaryDescriptorPath: /workflows/gemstone/wf_gemstone_plate_swipes.wdl

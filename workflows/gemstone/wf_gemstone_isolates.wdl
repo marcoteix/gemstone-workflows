@@ -15,16 +15,14 @@ import "../../tasks/species_typing/task_ts_mlst.wdl" as ts_mlst_task
 import "../../tasks/gene_typing/task_bakta.wdl" as bakta_task
 import "../../tasks/gene_typing/task_prokka.wdl" as prokka_task
 import "../../tasks/gene_typing/task_mob_suite.wdl" as mob_suite_task
-import "../../tasks/quality_control/task_qc_check_phb.wdl" as qc_check
+import "../../tasks/quality_control/task_qc_check_phb.wdl" as qc_check_task
 import "../../tasks/task_versioning.wdl" as versioning
 import "../../tasks/taxon_id/task_kraken2.wdl" as kraken2
-import "../../tasks/quality_control/task_pilon.wdl" as pilon
+import "../../tasks/quality_control/task_pilon.wdl" as pilon_task
 import "../../tasks/alignment/task_bwa.wdl" as bwa
 import "../../tasks/quality_control/task_checkm2.wdl" as checkm2_task
 import "../../tasks/quality_control/task_taxonomy_qc.wdl" as taxonomy_qc_task
-import "../../tasks/species_typing/task_strainge.wdl" as strainge_task
-import "../../tasks/species_typing/task_select_strainge_db.wdl" as select_strainge_db_task
-import "../../tasks/utilities/task_broad_terra_tools.wdl" as terra_tools
+import "../standalone_modules/wf_strainge_pe.wdl" as strainge_wf
 
 workflow gemstone_isolates {
   meta {
@@ -63,8 +61,9 @@ workflow gemstone_isolates {
     Float contamination_threshold = 1
     # StrainGE options
     Boolean call_strainge = false
-    Int strainge_kmer_size = 23
-    Array[File] strainge_dbs
+    Int strainge_db_kmer_size = 23
+    File strainge_db_config
+    Int strainge_max_strains = 2
   }
   call versioning.version_capture{
     input:
@@ -122,7 +121,7 @@ workflow gemstone_isolates {
           reference_genome = shovill_pe.assembly_fasta,
           samplename = samplename
       }
-      call pilon.pilon {
+      call pilon_task.pilon {
         input:
           assembly = shovill_pe.assembly_fasta,
           bam = bwa_pre_pilon.sorted_bam,
@@ -226,7 +225,7 @@ workflow gemstone_isolates {
           contamination_threshold = contamination_threshold
       }
       if (defined(qc_check_table)) {
-        call qc_check.qc_check_phb as qc_check_task {
+        call qc_check_task.qc_check_phb {
           input:
             qc_check_table = qc_check_table,
             expected_taxon = expected_taxon,
@@ -272,7 +271,7 @@ workflow gemstone_isolates {
           read2 = read_QC_trim.read2_clean
       }
       if (call_kraken2) {
-        call kraken2.kraken2_standalone as kraken2 {
+        call kraken2.kraken2_standalone as kraken {
           input:
             samplename = samplename,
             read1 = read_QC_trim.read1_clean,
@@ -281,26 +280,22 @@ workflow gemstone_isolates {
         }
       }
       if (call_strainge) {
-        call select_strainge_db_task.select_reference_db {
+        call strainge_wf.strainge_pe_wf as strainge {
           input:
             samplename = samplename,
-            gambit_taxonomy = gambit.gambit_predicted_taxon,
-            strainge_dbs = strainge_dbs
-        }
-        call strainge_task.strainge {
-          input:
-              samplename = samplename,
-              reads_1 = read_QC_trim.read1_clean,
-              reads_2 = read_QC_trim.read2_clean,
-              kmer_size = strainge_kmer_size,
-              strainge_db = strainge_dbs[select_reference_db.selected_db]
+            read1 = read_QC_trim.read1_clean,
+            read2 = read_QC_trim.read2_clean,
+            strainge_db_kmer_size = strainge_db_kmer_size,
+            strainge_max_strains = strainge_max_strains,
+            strainge_db_config = strainge_db_config,
+            predicted_taxonomy = gambit.gambit_predicted_taxon
         }
       }
     } 
-    call qc_check.qc_flags_check {
+    call qc_check_task.qc_flags_check {
       input:
         qc_taxonomy_flag = taxonomy_qc_check.qc_check,
-        qc_check_table_flag = qc_check_task.qc_check,
+        qc_check_table_flag = qc_check_phb.qc_check,
         qc_clean_reads_flag = clean_check_reads.read_screen
     }
   }
@@ -382,8 +377,8 @@ workflow gemstone_isolates {
     Float? est_coverage_clean = cg_pipeline_clean.est_coverage
     # Assembly QC - checkm2 outputs
     String? checkm2_version = checkm2.checkm2_version
-    String? checkm2_completeness = checkm2.completeness
-    String? checkm2_contamination = checkm2.contamination
+    Float? checkm2_completeness = checkm2.completeness
+    Float? checkm2_contamination = checkm2.contamination
     File? checkm2_report = checkm2.report
     # Taxon ID - gambit outputs
     File? gambit_report = gambit.gambit_report_file
@@ -457,8 +452,8 @@ workflow gemstone_isolates {
     String? qc_taxonomy_check = taxonomy_qc_check.qc_check
     File? qc_taxonomy_report = taxonomy_qc_check.qc_report
     # QC_Check Results
-    String? read_and_table_qc_check = qc_check_task.qc_check
-    File? read_and_table_qc_standard = qc_check_task.qc_standard
+    String? read_and_table_qc_check = qc_check_phb.qc_check
+    File? read_and_table_qc_standard = qc_check_phb.qc_standard
     String? qc_check = qc_flags_check.qc_check
     String? qc_note = qc_flags_check.qc_note
     # Ecoli Typing
@@ -675,20 +670,21 @@ workflow gemstone_isolates {
     String? srst2_vibrio_biotype = merlin_magic.srst2_vibrio_biotype
     String? srst2_vibrio_serogroup = merlin_magic.srst2_vibrio_serogroup
     # Kraken Results
-    String? kraken2_version = kraken2.kraken2_version
-    String? kraken2_docker = kraken2.kraken2_docker
-    String? kraken2_analysis_date = kraken2.analysis_date
-    File? kraken2_report = kraken2.kraken2_report
-    File? kraken2_classified_report = kraken2.kraken2_classified_report
-    File? kraken2_unclassified_read1 = kraken2.kraken2_unclassified_read1
-    File? kraken2_unclassified_read2 = kraken2.kraken2_unclassified_read2
-    File? kraken2_classified_read1 = kraken2.kraken2_classified_read1
-    File? kraken2_classified_read2 = kraken2.kraken2_classified_read2
-    Float? kraken2_percent_human = kraken2.kraken2_percent_human
-    File? bracken_report = kraken2.bracken_report
+    String? kraken2_version = kraken.kraken2_version
+    String? kraken2_docker = kraken.kraken2_docker
+    String? kraken2_analysis_date = kraken.analysis_date
+    File? kraken2_report = kraken.kraken2_report
+    File? kraken2_classified_report = kraken.kraken2_classified_report
+    File? kraken2_unclassified_read1 = kraken.kraken2_unclassified_read1
+    File? kraken2_unclassified_read2 = kraken.kraken2_unclassified_read2
+    File? kraken2_classified_read1 = kraken.kraken2_classified_read1
+    File? kraken2_classified_read2 = kraken.kraken2_classified_read2
+    Float? kraken2_percent_human = kraken.kraken2_percent_human
+    File? bracken_report = kraken.bracken_report
     # StrainGE Results
     File? straingst_kmerized_reads = strainge.straingst_kmerized_reads
-    String? straingst_reference_db = strainge.straingst_reference_db_used
+    File? straingst_reference_db = strainge.straingst_selected_db
+    Boolean? straingst_found_db = strainge.straingst_found_db
     File? straingst_strains = strainge.straingst_strains
     File? straingst_statistics = strainge.straingst_statistics
     File? straingr_concat_fasta = strainge.straingr_concat_fasta

@@ -1,41 +1,5 @@
 version 1.0
 
-import "task_strainge.wdl"
-
-# Return the Strainge_db struct that should be used with StrainGE
-task select_reference_db_deprecated {
-  input {
-    String samplename
-    String gambit_taxonomy
-    Array [File] strainge_dbs
-    Int disk_size = 8
-  }
-  command <<<
-
-    mkdir ~{samplename}
-
-    python3 <<CODE
-
-    gambit_taxonomy = "~{gambit_taxonomy}"
-    gambit_taxonomy = gambit_taxonomy.replace('_', ' ').split(' ')[0].capitalize()       
-    # Write to TXT file
-    with open(f"~{samplename}/GAMBIT_taxonomy.txt", "w") as f: f.write(gambit_taxonomy)
-
-    CODE
-  >>>
-  output {
-    String taxon = read_string("~{samplename}/GAMBIT_taxonomy.txt")
-  }
-  runtime {
-    docker: "us-docker.pkg.dev/general-theiagen/theiagen/terra-tools:2023-03-16"
-    memory: "8 GB"
-    cpu: 1
-    disks: "local-disk " + disk_size + " SSD"
-    disk: disk_size + " GB"
-    preemptible: 0
-  }
-}
-
 task select_reference_db {
   input {
     String samplename
@@ -94,6 +58,56 @@ task select_reference_db {
   >>>
   output {
     Int selected_db = read_int("~{samplename}/SELECTED_DB.txt")
+  }
+  runtime {
+    docker: "us-docker.pkg.dev/general-theiagen/theiagen/terra-tools:2023-03-16"
+    memory: "8 GB"
+    cpu: 1
+    disks: "local-disk " + disk_size + " SSD"
+    disk: disk_size + " GB"
+    preemptible: 0
+  }
+}
+
+task select_reference_db_lite {
+  input {
+    String samplename
+    String predicted_taxonomy
+    File strainge_db_config  # TSV containing database names and paths
+    Int disk_size = 4
+  }
+  command <<<
+
+    mkdir ~{samplename} && cd ~{samplename}
+
+    # Parse the predicted genus
+    echo $(date) - Parsing the predicted genus...
+
+    python3 << EOF
+
+  import os 
+
+  taxonomy = "~{predicted_taxonomy}"
+  taxonomy = taxonomy.replace('_', ' ').split(' ')[0].split("/")[0].capitalize()       
+  # Write to TXT file
+  with open("TAXON", "w") as f: f.write(taxonomy)
+
+  # Iterate over the TSV with the strainge_dbs and search for a match
+  with open("~{strainge_db_config}") as f:
+    for line in f:
+        db_taxon, db = line.replace("\n", "").split("\t")
+        if db_taxon == taxonomy:
+          with open("DATABASE", "w") as out_f: out_f.write(db)
+          break
+  
+  # Check if there was a match
+  with open("MATCH", "w") as f: f.write(str(os.path.exists("DATABASE")).lower())
+
+  EOF
+  >>>
+  output {
+    File selected_db = read_string("~{samplename}/DATABASE")
+    Boolean found_db = read_boolean("~{samplename}/MATCH")
   }
   runtime {
     docker: "us-docker.pkg.dev/general-theiagen/theiagen/terra-tools:2023-03-16"
