@@ -71,7 +71,7 @@ task metawrap {
     String metawrap_docker = '~{docker}'
     String metawrap_version = '~{docker}'
     String analysis_date = read_string("DATE")
-    String metawrap_insert_sizes = "~{samplename}/metawrap_binning/insert_sizes.txt"
+    File metawrap_insert_sizes = "~{samplename}/metawrap_binning/insert_sizes.txt"
     File metawrap_stats = "~{samplename}/metawrap_refinement/metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins.stats"
     Int metawrap_n_bins = read_string("~{samplename}/N_BINS")
     File metawrap_taxonomy = "~{samplename}/metawrap_classification/bin_taxonomy.tab"
