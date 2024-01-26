@@ -11,7 +11,7 @@ task metawrap {
     Int metawrap_contamination = 10
     Int metawrap_min_contig_length = 1000
     File ncbi_nt_database
-    File ncbi_tax_database
+    File ncbi_taxonomy_database
     File checkm_database
     Int mem = 32
     Int cpu = 16
@@ -20,6 +20,28 @@ task metawrap {
   command <<<
     echo $(metawrap --version) | sed 's/^.*metaWRAP v=//;s/ .*$//' | tee METAWRAP_VERSION
     date | tee DATE
+
+    entrypoint=$(pwd)
+
+    # Configure databases
+    mkdir databases && cd databases
+    mkdir checkm
+    echo "$(date) - Decompressing the CheckM database..."
+    tar -C ./checkm/ -xzvf ~{checkm_database}
+    echo "$(date) - Setting CheckM data root to $(pwd)..."
+    checkm data setRoot $(pwd)
+
+    mkdir ~/NCBI_TAX_DB
+    echo "$(date) - Decompressing the NCBI taxonomy database..."
+    tar -C ~/NCBI_TAX_DB/ -xzvf ~{ncbi_taxonomy_database}
+    
+    mkdir ~/NCBI_NT_DB
+    echo "$(date) - Decompressing the NCBI nt BLAST database..."
+    tar -C ~/NCBI_NT_DB/ -xzvf ~{ncbi_nt_database}
+    for a in nt.*.tar.gz; do tar -xzf $a; done
+    echo "$(date) - Finished setting up databases. Now to the interesting part..."
+
+    cd $entrypoint
 
     mkdir ~{samplename} && cd ~{samplename}
     binning_out=~{samplename}/metawrap_binning
