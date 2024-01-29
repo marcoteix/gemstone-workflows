@@ -255,17 +255,17 @@ workflow gemstone_plate_swipes {
     # Assembly stats
     Float? percentage_mapped_reads = assembled_reads_percent.percentage_mapped
     # StrainGE outputs
-    File? straingst_kmerized_reads = strainge.straingst_kmerized_reads
-    File? straingst_selected_db = strainge.straingst_selected_db
+    Array[File]? straingst_kmerized_reads = strainge.straingst_kmerized_reads
+    Array[File]? straingst_selected_db = strainge.straingst_selected_db
     Boolean? straingst_found_db = strainge.straingst_found_db
-    File? straingst_strains = strainge.straingst_strains
-    File? straingst_statistics = strainge.straingst_statistics
-    File? straingr_concat_fasta = strainge.straingr_concat_fasta
-    File? straingr_read_alignment = strainge.straingr_read_alignment
-    File? straingr_variants = strainge.straingr_variants
-    File? straingr_report = strainge.straingr_report
-    String? strainge_docker = strainge.strainge_docker
-    String? strainge_version = strainge.strainge_version
+    Array[File]? straingst_strains = strainge.straingst_strains
+    Array[File]? straingst_statistics = strainge.straingst_statistics
+    Array[File]? straingr_concat_fasta = strainge.straingr_concat_fasta
+    Array[File]? straingr_read_alignment = strainge.straingr_read_alignment
+    Array[File]? straingr_variants = strainge.straingr_variants
+    Array[File]? straingr_report = strainge.straingr_report
+    Array[String]? strainge_docker = strainge.strainge_docker
+    Array[String]? strainge_version = strainge.strainge_version
     # Bakta outputs
     File bakta_gbff = bakta.bakta_gbff
     File bakta_gff3 = bakta.bakta_gff3

@@ -88,25 +88,28 @@ task select_reference_db_lite {
   import os 
 
   taxonomy = "~{predicted_taxonomy}"
-  taxonomy = taxonomy.replace('_', ' ').split(' ')[0].split("/")[0].capitalize()       
+  # If there are multiple taxa separated by /, include all
+  taxonomy = [x.replace('_', ' ').split(' ')[0].capitalize() for x in taxonomy.split("/")]
   # Write to TXT file
-  with open("TAXON", "w") as f: f.write(taxonomy)
+  with open("TAXON", "w") as f: f.write("\n".join(taxonomy))
 
   # Iterate over the TSV with the strainge_dbs and search for a match
+  matched = False
   with open("~{strainge_db_config}") as f:
+    with open("DATABASE", "w") as out_f: out_f.write("")
     for line in f:
         db_taxon, db = line.replace("\n", "").split("\t")
-        if db_taxon == taxonomy:
-          with open("DATABASE", "w") as out_f: out_f.write(db)
-          break
+        if db_taxon in taxonomy:
+          with open("DATABASE", "a") as out_f: out_f.write(db+"\n")
+          matched = True
   
   # Check if there was a match
-  with open("MATCH", "w") as f: f.write(str(os.path.exists("DATABASE")).lower())
+  with open("MATCH", "w") as f: f.write(str(matched).lower())
 
   EOF
   >>>
   output {
-    File selected_db = read_string("~{samplename}/DATABASE")
+    Array[File] selected_db = read_lines("~{samplename}/DATABASE")
     Boolean found_db = read_boolean("~{samplename}/MATCH")
   }
   runtime {

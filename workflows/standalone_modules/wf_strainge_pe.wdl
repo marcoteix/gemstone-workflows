@@ -26,30 +26,32 @@ workflow strainge_pe_wf {
         strainge_db_config = strainge_db_config
   }
   if (select_reference_db.found_db) {
-    call strainge.strainge as strainge_isolate{
-      input:
-          samplename = samplename,
-          reads_1 = read1,
-          reads_2 = read2,
-          kmer_size = strainge_db_kmer_size,
-          strainge_db = select_reference_db.selected_db,
-          disk_size = strainge_disk_size,
-          cpus = strainge_cpus,
-          memory = strainge_memory,
-          max_strains = strainge_max_strains
+    scatter (strainge_db in select_reference_db.selected_db) {
+      call strainge.strainge as strainge_isolate{
+        input:
+            samplename = samplename,
+            reads_1 = read1,
+            reads_2 = read2,
+            kmer_size = strainge_db_kmer_size,
+            strainge_db = strainge_db,
+            disk_size = strainge_disk_size,
+            cpus = strainge_cpus,
+            memory = strainge_memory,
+            max_strains = strainge_max_strains
+      }
     }
   }
   output {
-    File? straingst_kmerized_reads = strainge_isolate.straingst_kmerized_reads
-    File straingst_selected_db = select_reference_db.selected_db
+    Array[File]? straingst_kmerized_reads = strainge_isolate.straingst_kmerized_reads
+    Array[File] straingst_selected_db = select_reference_db.selected_db
     Boolean straingst_found_db = select_reference_db.found_db
-    File? straingst_strains = strainge_isolate.straingst_strains
-    File? straingst_statistics = strainge_isolate.straingst_statistics
-    File? straingr_concat_fasta = strainge_isolate.straingr_concat_fasta
-    File? straingr_read_alignment = strainge_isolate.straingr_read_alignment
-    File? straingr_variants = strainge_isolate.straingr_variants
-    File? straingr_report = strainge_isolate.straingr_report
-    String? strainge_docker = strainge_isolate.strainge_docker
-    String? strainge_version = strainge_isolate.strainge_version
+    Array[File]? straingst_strains = strainge_isolate.straingst_strains
+    Array[File]? straingst_statistics = strainge_isolate.straingst_statistics
+    Array[File]? straingr_concat_fasta = strainge_isolate.straingr_concat_fasta
+    Array[File]? straingr_read_alignment = strainge_isolate.straingr_read_alignment
+    Array[File]? straingr_variants = strainge_isolate.straingr_variants
+    Array[File]? straingr_report = strainge_isolate.straingr_report
+    Array[String]? strainge_docker = strainge_isolate.strainge_docker
+    Array[String]? strainge_version = strainge_isolate.strainge_version
   }
 }
