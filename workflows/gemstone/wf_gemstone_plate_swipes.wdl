@@ -3,6 +3,7 @@ version 1.0
 import "../utilities/wf_read_QC_trim_pe.wdl" as read_qc_wf
 import "../utilities/wf_metaspades_assembly.wdl" as metaspades_assembly_wf
 import "../../tasks/taxon_id/task_kraken2.wdl" as kraken_task
+import "../../tasks/taxon_id/task_metawrap.wdl" as metawrap_task
 import "../../tasks/alignment/task_minimap2.wdl" as minimap2_task
 import "../../tasks/utilities/task_parse_mapping.wdl" as parse_mapping_task
 import "../../tasks/quality_control/task_quast.wdl" as quast_task
@@ -39,6 +40,13 @@ workflow gemstone_plate_swipes {
     Int kraken2_mem = 32
     Int kraken2_cpu = 4
     Int kraken2_disk_size = 256
+    # metaWRAP options
+    Boolean call_metawrap = false
+    File? metawrap_checkm_db
+    Int metawrap_completion = 80
+    Int metawrap_contamination = 10
+    Int metawrap_min_contig_length = 1000
+
   }
   call read_qc_wf.read_QC_trim_pe as read_QC_trim {
     input:
@@ -167,6 +175,19 @@ workflow gemstone_plate_swipes {
         predicted_taxonomy = lab_determined_genus
     }
   }
+  if (call_metawrap) {
+    call metawrap_task.metawrap_binning as metawrap {
+      input:
+        samplename = samplename,
+        assembly_fasta = metaspades.assembly_fasta,
+        read1 = read_QC_trim.read1_clean,
+        read2 = read_QC_trim.read2_clean,
+        metawrap_completion = metawrap_completion,
+        metawrap_contamination = metawrap_contamination,
+        metawrap_min_contig_length = metawrap_min_contig_length,
+        checkm_database = select_first([metawrap_checkm_db])
+    }
+  }
   call versioning.version_capture{
     input:
   }
@@ -271,5 +292,11 @@ workflow gemstone_plate_swipes {
     String amrfinderplus_amr_subclasses = amrfinderplus_task.amrfinderplus_amr_subclasses
     String amrfinderplus_version = amrfinderplus_task.amrfinderplus_version
     String amrfinderplus_db_version = amrfinderplus_task.amrfinderplus_db_version
+    # MetaWRAP outputs
+    String? metawrap_docker = metawrap.metawrap_docker
+    String? metawrap_version = metawrap.metawrap_version
+    File? metawrap_insert_sizes = metawrap.metawrap_insert_sizes
+    File? metawrap_stats = metawrap.metawrap_stats
+    Int? metawrap_n_bins = metawrap.metawrap_n_bins
   }
 }

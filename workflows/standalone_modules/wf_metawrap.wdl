@@ -2,9 +2,9 @@ version 1.0
 
 import "../../tasks/taxon_id/task_metawrap.wdl" as metawrap_task
 
-workflow strainge_pe_wf {
+workflow metawrap_pe_wf {
   meta {
-    description: "Assembly binning and taxon assignment with metaWRAP."
+    description: "Assembly binning with metaWRAP."
   }
   input {
     File assembly_fasta
@@ -14,11 +14,9 @@ workflow strainge_pe_wf {
     Int metawrap_completion = 80
     Int metawrap_contamination = 10
     Int metawrap_min_contig_length = 1000
-    File ncbi_nt_database
-    File ncbi_taxonomy_database
     File checkm_database
   }
-  call metawrap_task.metawrap {
+  call metawrap_task.metawrap_binning as metawrap {
     input:
       assembly_fasta = assembly_fasta,
       read1 = read1,
@@ -27,8 +25,6 @@ workflow strainge_pe_wf {
       metawrap_completion = metawrap_completion,
       metawrap_contamination = metawrap_contamination,
       metawrap_min_contig_length = metawrap_min_contig_length,
-      ncbi_nt_database = ncbi_nt_database,
-      ncbi_taxonomy_database = ncbi_taxonomy_database,
       checkm_database = checkm_database
   }
   output {
@@ -38,6 +34,5 @@ workflow strainge_pe_wf {
     File metawrap_insert_sizes = metawrap.metawrap_insert_sizes
     File metawrap_stats = metawrap.metawrap_stats
     Int metawrap_n_bins = metawrap.metawrap_n_bins
-    File metawrap_taxonomy = metawrap.metawrap_taxonomy 
   }
 }
