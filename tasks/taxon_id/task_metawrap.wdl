@@ -113,7 +113,7 @@ task metawrap_binning {
     echo "$(date) - Decompressing the CheckM database..."
     tar -C ./checkm/ -xzvf ~{checkm_database}
     echo "$(date) - Setting CheckM data root to $(pwd)..."
-    checkm data setRoot $(pwd)
+    checkm data setRoot $entrypoint/checkm
     echo "$(date) - Finished setting up databases. Now to the interesting part..."
 
     cd $entrypoint
