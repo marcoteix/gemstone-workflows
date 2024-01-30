@@ -13,8 +13,8 @@ task metawrap {
     File ncbi_nt_database
     File ncbi_taxonomy_database
     File checkm_database
-    Int mem = 32
-    Int cpu = 16
+    Int mem = 64
+    Int cpu = 8
     Int disk_size = 100
   }
   command <<<
@@ -113,8 +113,13 @@ task metawrap_binning {
     echo "$(date) - Decompressing the CheckM database..."
     tar -C ./checkm/ -xzvf ~{checkm_database}
     echo "$(date) - Setting CheckM data root to $(pwd)..."
-    checkm data setRoot $entrypoint/checkm
-    echo "$(date) - Finished setting up databases. Now to the interesting part..."
+    # Run the command twice because it fails if you do it just once, for some reason
+    echo checkm | checkm data setRoot
+    echo checkm | checkm data setRoot
+    echo "$(date) - Finished setting up databases. Unzipping reads..."
+    # Decompress reads. Rename it to end with _R1.fastq and _R2.fastq
+    gzip -d ~{read1} && f=~{read1} && decomp_f="${f%.*}" && r1="${decomp_f%.*}"_1.fastq && mv $decomp_f $r1
+    gzip -d ~{read2} && f=~{read2} && decomp_f="${f%.*}" && r2="${decomp_f%.*}"_2.fastq && mv $decomp_f $r2
 
     cd $entrypoint
 
@@ -124,7 +129,7 @@ task metawrap_binning {
 
     echo "$(date) - Creating initial bins with metabat2, maxbin2, and concoct. This may take a while."
     metawrap binning -o $binning_out -t ~{cpu} -m ~{mem} -a ~{assembly_fasta} --metabat2 --maxbin2 --concoct \
-      -l ~{metawrap_min_contig_length} ~{read1} ~{read2}
+      -l ~{metawrap_min_contig_length} $r1 $r2
     echo "$(date) - Refining bins..."
     metawrap bin_refinement -o $refinement_out -t ~{cpu} -m ~{mem} -A $binning_out/metabat2_bins/ \
       -B $binning_out/maxbin2_bins/ -C $binning_out/concoct_bins/ -c ~{metawrap_completion} \
