@@ -140,7 +140,7 @@ task metawrap_binning {
 
     # Get number of bins meeting the contamination and completeness thresholds
     echo $(cat $refinement_out/metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins.stats | \
-      awk '$2>~{metawrap_completion} && $3<~{metawrap_contamination}' | wc -l) > N_BINS
+      awk '$2>~{metawrap_completion} && $3<~{metawrap_contamination}' | wc -l) > ~{samplename}/N_BINS
 
     echo "$(date) - Done!"
 
