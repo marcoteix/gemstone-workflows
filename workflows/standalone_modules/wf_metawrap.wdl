@@ -31,7 +31,6 @@ workflow metawrap_pe_wf {
     String metawrap_docker = metawrap.metawrap_docker
     String metawrap_version = metawrap.metawrap_version
     String metawrap_analysis_date = metawrap.analysis_date
-    File metawrap_insert_sizes = metawrap.metawrap_insert_sizes
     File metawrap_stats = metawrap.metawrap_stats
     Int metawrap_n_bins = metawrap.metawrap_n_bins
   }
