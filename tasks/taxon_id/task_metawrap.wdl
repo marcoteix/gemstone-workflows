@@ -124,8 +124,9 @@ task metawrap_binning {
     cd $entrypoint
 
     mkdir ~{samplename} && cd ~{samplename}
-    binning_out=~{samplename}/metawrap_binning
-    refinement_out=~{samplename}/metawrap_refinement
+    echo "CWD: $(pwd)"
+    binning_out=$entrypoint/~{samplename}/metawrap_binning
+    refinement_out=$entrypoint/~{samplename}/metawrap_refinement
 
     echo "$(date) - Creating initial bins with metabat2, maxbin2, and concoct. This may take a while."
     metawrap binning -o $binning_out -t ~{cpu} -m ~{mem} -a ~{assembly_fasta} --metabat2 --maxbin2 --concoct \
