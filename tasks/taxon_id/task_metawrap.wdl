@@ -118,12 +118,14 @@ task metawrap_binning {
     echo checkm | checkm data setRoot
     echo "$(date) - Finished setting up databases. Unzipping reads..."
     # Decompress reads. Rename it to end with _R1.fastq and _R2.fastq
-    gzip -d ~{read1} && f=~{read1} && decomp_f="${f%.*}" && r1="${decomp_f%.*}"_1.fastq && mv $decomp_f $r1
-    gzip -d ~{read2} && f=~{read2} && decomp_f="${f%.*}" && r2="${decomp_f%.*}"_2.fastq && mv $decomp_f $r2
+    cd $entrypoint && mkdir ~{samplename} && mkdir ~{samplename}/reads
+    r1=~{samplename}/reads/~{samplename}_1.fastq
+    r2=~{samplename}/reads/~{samplename}_2.fastq
+    gzip -dc ~{read1} > $r1
+    gzip -dc ~{read2} > $r2
 
     cd $entrypoint
 
-    mkdir ~{samplename} && cd ~{samplename}
     echo "CWD: $(pwd)"
     binning_out=$entrypoint/~{samplename}/metawrap_binning
     refinement_out=$entrypoint/~{samplename}/metawrap_refinement
