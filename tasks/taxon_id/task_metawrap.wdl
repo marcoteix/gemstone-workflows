@@ -100,6 +100,8 @@ task metawrap_binning {
     Int mem = 32
     Int cpu = 16
     Int disk_size = 100
+    # Tools used in metawrap
+    String binning_flags = "--metabat2 --maxbin2 --concoct"
   }
   command <<<
     echo $(metawrap --version) | sed 's/^.*metaWRAP v=//;s/ .*$//' | tee METAWRAP_VERSION
@@ -131,7 +133,7 @@ task metawrap_binning {
     refinement_out=$entrypoint/~{samplename}/metawrap_refinement
 
     echo "$(date) - Creating initial bins with metabat2, maxbin2, and concoct. This may take a while."
-    metawrap binning -o $binning_out -t ~{cpu} -m ~{mem} -a ~{assembly_fasta} --metabat2 --maxbin2 --concoct \
+    metawrap binning -o $binning_out -t ~{cpu} -m ~{mem} -a ~{assembly_fasta} ~{binning_flags} \
       -l ~{metawrap_min_contig_length} $r1 $r2
     echo "$(date) - Refining bins..."
     metawrap bin_refinement -o $refinement_out -t ~{cpu} -m ~{mem} -A $binning_out/metabat2_bins/ \
@@ -142,13 +144,18 @@ task metawrap_binning {
     echo $(cat $refinement_out/metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins.stats | \
       awk '$2>~{metawrap_completion} && $3<~{metawrap_contamination}' | wc -l) > ~{samplename}/N_BINS
 
+    echo $binning_out : $(ls $binning_out)
+    echo $refinement_out : $(ls $refinement_out)
+    echo metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins : $(ls $refinement_out/metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins)
+
     echo "$(date) - Done!"
 
   >>>
   output {
     String metawrap_docker = '~{docker}'
-    String metawrap_version = '~{docker}'
+    String metawrap_version = read_string("METAWRAP_VERSION")
     String analysis_date = read_string("DATE")
+    String metawrap_binning_flags = "~{binning_flags}"
     File metawrap_stats = "~{samplename}/metawrap_refinement/metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins.stats"
     Int metawrap_n_bins = read_string("~{samplename}/N_BINS")
   }

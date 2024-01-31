@@ -15,6 +15,7 @@ workflow metawrap_pe_wf {
     Int metawrap_contamination = 10
     Int metawrap_min_contig_length = 1000
     File checkm_database
+    String binning_flags = "--metabat2 --maxbin2 --concoct"
   }
   call metawrap_task.metawrap_binning as metawrap {
     input:
@@ -25,7 +26,8 @@ workflow metawrap_pe_wf {
       metawrap_completion = metawrap_completion,
       metawrap_contamination = metawrap_contamination,
       metawrap_min_contig_length = metawrap_min_contig_length,
-      checkm_database = checkm_database
+      checkm_database = checkm_database,
+      binning_flags = binning_flags
   }
   output {
     String metawrap_docker = metawrap.metawrap_docker
@@ -33,5 +35,6 @@ workflow metawrap_pe_wf {
     String metawrap_analysis_date = metawrap.analysis_date
     File metawrap_stats = metawrap.metawrap_stats
     Int metawrap_n_bins = metawrap.metawrap_n_bins
+    String metawrap_binning_flags = metawrap.metawrap_binning_flags
   }
 }
