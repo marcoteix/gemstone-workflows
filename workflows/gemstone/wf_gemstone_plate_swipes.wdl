@@ -46,7 +46,7 @@ workflow gemstone_plate_swipes {
     Int metawrap_completion = 80
     Int metawrap_contamination = 10
     Int metawrap_min_contig_length = 1000
-
+    String binning_flags = "--metabat2 --maxbin2 --concoct"
   }
   call read_qc_wf.read_QC_trim_pe as read_QC_trim {
     input:
@@ -185,7 +185,8 @@ workflow gemstone_plate_swipes {
         metawrap_completion = metawrap_completion,
         metawrap_contamination = metawrap_contamination,
         metawrap_min_contig_length = metawrap_min_contig_length,
-        checkm_database = select_first([metawrap_checkm_db])
+        checkm_database = select_first([metawrap_checkm_db]),
+        binning_flags = binning_flags
     }
   }
   call versioning.version_capture{
@@ -297,5 +298,8 @@ workflow gemstone_plate_swipes {
     String? metawrap_version = metawrap.metawrap_version
     File? metawrap_stats = metawrap.metawrap_stats
     Int? metawrap_n_bins = metawrap.metawrap_n_bins
+    String? metawrap_binning_flags = metawrap.metawrap_binning_flags
+    Array[File]? metawrap_fasta = metawrap.metawrap_fasta
+    File? metawrap_contigs = metawrap.metawrap_contigs
   }
 }

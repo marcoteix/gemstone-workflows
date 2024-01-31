@@ -144,6 +144,11 @@ task metawrap_binning {
     echo $(cat $refinement_out/metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins.stats | \
       awk '$2>~{metawrap_completion} && $3<~{metawrap_contamination}' | wc -l) > ~{samplename}/N_BINS
 
+    # Write output bin FASTA locations
+    for fasta in $refinement_out/metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins/*; do
+      echo $fasta >> ~{samplename}/BINS
+    done
+
     echo $binning_out : $(ls $binning_out)
     echo $refinement_out : $(ls $refinement_out)
     echo metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins : $(ls $refinement_out/metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins)
@@ -158,6 +163,8 @@ task metawrap_binning {
     String metawrap_binning_flags = "~{binning_flags}"
     File metawrap_stats = "~{samplename}/metawrap_refinement/metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins.stats"
     Int metawrap_n_bins = read_string("~{samplename}/N_BINS")
+    Array[File] metawrap_fasta = read_lines("~{samplename}/BINS")
+    File metawrap_contigs = "~{samplename}/metawrap_refinement/metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins.contigs"
   }
   runtime {
       docker: "~{docker}"

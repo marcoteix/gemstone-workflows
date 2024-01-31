@@ -36,5 +36,7 @@ workflow metawrap_pe_wf {
     File metawrap_stats = metawrap.metawrap_stats
     Int metawrap_n_bins = metawrap.metawrap_n_bins
     String metawrap_binning_flags = metawrap.metawrap_binning_flags
+    Array[File] metawrap_fasta = metawrap.metawrap_fasta
+    File metawrap_contigs = metawrap.metawrap_contigs
   }
 }
