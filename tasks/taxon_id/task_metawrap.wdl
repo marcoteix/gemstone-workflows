@@ -163,7 +163,7 @@ task metawrap_binning {
     String metawrap_binning_flags = "~{binning_flags}"
     File metawrap_stats = "~{samplename}/metawrap_refinement/metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins.stats"
     Int metawrap_n_bins = read_string("~{samplename}/N_BINS")
-    Array[File] metawrap_fasta = read_lines("~{samplename}/BINS")
+    Array[File] metawrap_fasta = glob("~{samplename}/metawrap_refinement/metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins/*")
     File metawrap_contigs = "~{samplename}/metawrap_refinement/metawrap_~{metawrap_completion}_~{metawrap_contamination}_bins.contigs"
   }
   runtime {
