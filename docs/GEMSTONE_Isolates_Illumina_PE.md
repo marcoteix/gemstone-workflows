@@ -1,12 +1,12 @@
-# GEMSTONE_Plate_Swipes_Illumina_PE
+# GEMSTONE_Isolates_Illumina_PE
 
 <span style="font-size:200%; color:grey"> `v1.0.0` </span>
 
 This workflow processes paired-end Illumina reads from plate swipes/plate bacterial metagenomes. It could also be used for broader bacterial metagenomic analysis. It removes human reads, performs QA and QC, and metagenomic assembly. Furthermore, it estimates taxa abundances with Kraken2 and Bracken, does strain-level identification with StrainGE, bins MAGs, performs AMR genotyping, and identifies plasmid contigs.
 
-This workflow was based on the [PHB v1.0.0 TheiaMeta workflow](https://theiagen.notion.site/TheiaMeta-7e73c010559148b380144d7c3b3ec4e6) from Theiagen.
+This workflow was based on the [PHB v1.0.0 TheiaProk workflow](https://theiagen.notion.site/TheiaProk-Workflow-Series-1296f3df6a7c41c7937053a03f664a5a) from Theiagen.
 
-![GEMSTONE_Plate_Swipes_Illumina_PE workflow diagram](figures/GEMSTONE_Plate_Swipes_Illumina_PE.svg "GEMSTONE_Plate_Swipes_Illumina_PE workflow diagram")
+![GEMSTONE_Isolates_Illumina_PE workflow diagram](figures/GEMSTONE_Isolates_Illumina_PE.svg "GEMSTONE_Isolates_Illumina_PE workflow diagram")
 
 ## Inputs
 <details open>
