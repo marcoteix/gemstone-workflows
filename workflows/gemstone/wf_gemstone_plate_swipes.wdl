@@ -34,7 +34,7 @@ workflow gemstone_plate_swipes {
     Int strainge_db_kmer_size = 23
     # Kraken options
     Boolean call_kraken2 = false
-    File? kraken2_db
+    File kraken2_db
     Int bracken_read_len = 150
     String bracken_classification_level = "G"
     Int kraken2_mem = 32
@@ -61,7 +61,7 @@ workflow gemstone_plate_swipes {
         samplename = samplename,
         read1 = read_QC_trim.read1_clean,
         read2 = read_QC_trim.read2_clean,
-        kraken2_db = select_first([kraken2_db]),
+        kraken2_db = kraken2_db,
         kraken2_args = "",
         classified_out = "classified#.fastq",
         unclassified_out = "unclassified#.fastq",
