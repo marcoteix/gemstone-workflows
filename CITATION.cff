@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: "If you use PHB workflows, please cite it as below."
+message: "Based on PHB workflows by:"
 authors:
 - family-names: "Libuit"
   given-names: "Kevin G"

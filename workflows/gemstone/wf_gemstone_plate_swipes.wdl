@@ -195,12 +195,14 @@ workflow gemstone_plate_swipes {
   output {
     # Version capture
     String theiameta_illumina_pe_version = version_capture.phb_version
-    String theiameta_illumina_pe_analysis_date = version_capture.date
+    String analysis_date = version_capture.date
     # Kraken2 outputs
     String? kraken2_version = kraken2_clean.kraken2_version
     String? kraken2_docker = kraken2_clean.kraken2_docker
-    File? kraken2_report_clean = kraken2_clean.kraken2_report
-    Float? kraken2_percent_human_clean = kraken2_clean.kraken2_percent_human
+    File? kraken2_report = kraken2_clean.kraken2_report
+    Float? kraken2_percent_human = kraken2_clean.kraken2_percent_human
+    File? bracken_report = kraken2_clean.bracken_report
+    String? bracken_version = kraken2_clean.bracken_version
     # Read QC - dehosting outputs
     File? read1_dehosted = read_QC_trim.read1_dehosted
     File? read2_dehosted = read_QC_trim.read2_dehosted
