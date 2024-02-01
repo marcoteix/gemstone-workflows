@@ -662,8 +662,8 @@ Bin assignments to each contig in the MAG, as a TSV file. Returned only if `call
 
 __Marco Teixeira__
 
-<span style="font-size:80%; margin-top:0px"> mcarvalh@broadinstitute.org </style>
+<span style="font-size:80%; margin-top:0px"> mcarvalh@broadinstitute.org </span>
 
 __Colin Worby__
 
-<span style="font-size:80%; margin-top:0px"> cworby@broadinstitute.org </style>
+<span style="font-size:80%; margin-top:0px"> cworby@broadinstitute.org </span>
