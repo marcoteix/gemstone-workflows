@@ -177,8 +177,6 @@ This workflow was based on the [PHB v1.0.0 TheiaProk workflow](https://theiagen.
 #### clean_read_screen
 `String` `Optional` "PASS" or "FAIL" result from clean read screening. If the result is "FAIL", the flag is accompanied by the reason for failure. If the raw reads did not pass QC, `clean_read_screen` will not be returned.
 
-
-
 ### Read QA/QC
 
 #### num_reads_raw1

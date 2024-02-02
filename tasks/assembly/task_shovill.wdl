@@ -55,8 +55,9 @@ task shovill_pe {
       --keepfiles
 
     mv out/contigs.fa out/~{samplename}_contigs.fasta
-    echo $(ls out)
-    mv out/pilon/pilon.vcf out/~{samplename}_pilon.vcf
+    echo "pilon dir: $(ls pilon)"
+    echo "cwd: $(ls)"
+    mv pilon/pilon.vcf out/~{samplename}_pilon.vcf
 
     if [ "~{assembler}" == "spades" ] ; then
       mv out/contigs.gfa out/~{samplename}_contigs.gfa
