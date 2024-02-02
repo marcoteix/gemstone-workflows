@@ -51,9 +51,12 @@ task shovill_pe {
       ~{true='--trim' false='' trim} \
       ~{true='--noreadcorr' false='' noreadcorr} \
       ~{true='--nostitch' false='' nostitch} \
-      ~{true='--nocorr' false='' nocorr}
+      ~{true='--nocorr' false='' nocorr} \
+      --keepfiles
 
     mv out/contigs.fa out/~{samplename}_contigs.fasta
+    echo $(ls out)
+    mv out/pilon/pilon.vcf out/~{samplename}_pilon.vcf
 
     if [ "~{assembler}" == "spades" ] ; then
       mv out/contigs.gfa out/~{samplename}_contigs.gfa
@@ -69,6 +72,7 @@ task shovill_pe {
     File? contigs_fastg = "out/~{samplename}_contigs.fastg"
     File? contigs_lastgraph = "out/~{samplename}_contigs.LastGraph"
     String shovill_version = read_string("VERSION")
+    File? pilon_vcf = "out/~{samplename}_pilon.vcf"
   }
   runtime {
     docker: "~{docker}"
@@ -125,7 +129,7 @@ task shovill_se {
       ~{'--kmers ' + kmers} \
       ~{true='--trim' false='' trim} \
       ~{true='--noreadcorr' false='' noreadcorr} \
-      ~{true='--nocorr' false='' nocorr}
+      ~{true='--nocorr' false='' nocorr} 
 
     mv out/contigs.fa out/~{samplename}_contigs.fasta
 
@@ -136,6 +140,7 @@ task shovill_se {
     elif [ "~{assembler}" == "velvet" ] ; then
       mv out/contigs.LastGraph out/~{samplename}_contigs.LastGraph
     fi
+
   >>>
   output {
     File assembly_fasta = "out/~{samplename}_contigs.fasta"

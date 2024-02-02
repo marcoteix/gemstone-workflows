@@ -7,19 +7,14 @@ import "../../tasks/quality_control/task_quast.wdl" as quast_task
 import "../../tasks/quality_control/task_cg_pipeline.wdl" as cg_pipeline
 import "../../tasks/quality_control/task_screen.wdl" as screen
 import "../../tasks/taxon_id/task_gambit.wdl" as gambit_task
-import "../../tasks/quality_control/task_mummer_ani.wdl" as ani_task
 import "../../tasks/taxon_id/task_kmerfinder.wdl" as kmerfinder_task
 import "../../tasks/gene_typing/task_amrfinderplus.wdl" as amrfinderplus
-import "../../tasks/gene_typing/task_resfinder.wdl" as resfinder
 import "../../tasks/species_typing/task_ts_mlst.wdl" as ts_mlst_task
 import "../../tasks/gene_typing/task_bakta.wdl" as bakta_task
-import "../../tasks/gene_typing/task_prokka.wdl" as prokka_task
 import "../../tasks/gene_typing/task_mob_suite.wdl" as mob_suite_task
 import "../../tasks/quality_control/task_qc_check_phb.wdl" as qc_check_task
 import "../../tasks/task_versioning.wdl" as versioning
 import "../../tasks/taxon_id/task_kraken2.wdl" as kraken2
-import "../../tasks/quality_control/task_pilon.wdl" as pilon_task
-import "../../tasks/alignment/task_bwa.wdl" as bwa
 import "../../tasks/quality_control/task_checkm2.wdl" as checkm2_task
 import "../../tasks/quality_control/task_taxonomy_qc.wdl" as taxonomy_qc_task
 import "../standalone_modules/wf_strainge_pe.wdl" as strainge_wf
@@ -30,7 +25,6 @@ workflow gemstone_isolates {
   }
   input {
     String samplename
-    String seq_method = "ILLUMINA"
     File read1_raw
     File read2_raw
     Int? genome_size
@@ -48,17 +42,20 @@ workflow gemstone_isolates {
     Int trim_quality_trim_score = 20
     Int trim_window_size = 10
     # module options
-    Boolean call_ani = false # by default do not call ANI task, but user has ability to enable this task if working with enteric pathogens or supply their own high-quality reference genome
     Boolean call_kmerfinder = false 
-    Boolean call_resfinder = false
-    String genome_annotation = "bakta" # options: "prokka" or "bakta"
-    String? expected_taxon  # allow user to provide organism (e.g. "Clostridioides_difficile") string to amrfinder. Useful when gambit does not predict the correct species    # qc check parameters
+    String? expected_taxon  # allow user to provide organism (e.g. "Clostridioides_difficile") string to amrfinder. Useful when gambit does not predict the correct species    
+    # qc check parameters
     File? qc_check_table
     # Kraken options
     Boolean call_kraken2 = false
     File kraken2_db
+    Int bracken_read_len = 150
+    String bracken_classification_level = "G"
+    Int kraken2_mem = 32
+    Int kraken2_cpu = 4
+    Int kraken2_disk_size = 256
     # CheckM2 QC options
-    Float contamination_threshold = 1
+    Float contamination_threshold = 2
     # StrainGE options
     Boolean call_strainge = false
     Int strainge_db_kmer_size = 23
@@ -90,7 +87,6 @@ workflow gemstone_isolates {
         trim_minlen = trim_minlen,
         trim_quality_trim_score = trim_quality_trim_score,
         trim_window_size = trim_window_size
-
     }
     call screen.check_reads as clean_check_reads {
       input:
@@ -114,30 +110,9 @@ workflow gemstone_isolates {
           genome_size = select_first([genome_size, clean_check_reads.est_genome_length]),
           assembler = "spades"
       }
-      call bwa.bwa as bwa_pre_pilon{
-        input:
-          read1 = read_QC_trim.read1_clean,
-          read2 = read_QC_trim.read2_clean,
-          reference_genome = shovill_pe.assembly_fasta,
-          samplename = samplename
-      }
-      call pilon_task.pilon {
-        input:
-          assembly = shovill_pe.assembly_fasta,
-          bam = bwa_pre_pilon.sorted_bam,
-          bai = bwa_pre_pilon.sorted_bai,
-          samplename = samplename
-      }
-      call bwa.bwa as bwa_post_pilon{
-        input:
-          read1 = read_QC_trim.read1_clean,
-          read2 = read_QC_trim.read2_clean,
-          reference_genome = pilon.assembly_fasta,
-          samplename = samplename
-      } 
       call quast_task.quast {
         input:
-          assembly = pilon.assembly_fasta,
+          assembly = shovill_pe.assembly_fasta,
           samplename = samplename
       }
       call cg_pipeline.cg_pipeline as cg_pipeline_raw {
@@ -156,64 +131,40 @@ workflow gemstone_isolates {
       }
       call gambit_task.gambit {
         input:
-          assembly = pilon.assembly_fasta,
+          assembly = shovill_pe.assembly_fasta,
           samplename = samplename
       }
       call checkm2_task.checkm2 {
         input:
-          assembly = pilon.assembly_fasta,
+          assembly = shovill_pe.assembly_fasta,
           samplename = samplename
-      }
-      if (call_ani) {
-        call ani_task.animummer as ani {
-          input:
-            assembly = pilon.assembly_fasta,
-            samplename = samplename
-        }
       }
       if (call_kmerfinder) {
         call kmerfinder_task.kmerfinder_bacteria as kmerfinder {
           input:
-            assembly = pilon.assembly_fasta,
+            assembly = shovill_pe.assembly_fasta,
             samplename = samplename
         }
       }
       call amrfinderplus.amrfinderplus_nuc as amrfinderplus_task {
         input:
-          assembly = pilon.assembly_fasta,
+          assembly = shovill_pe.assembly_fasta,
           samplename = samplename,
           organism = select_first([expected_taxon, gambit.gambit_predicted_taxon])
       }
-      if (call_resfinder) {
-        call resfinder.resfinder as resfinder_task {
-          input:
-            assembly = pilon.assembly_fasta,
-            samplename = samplename,
-            organism = select_first([expected_taxon, gambit.gambit_predicted_taxon])
-        }
-      }
       call ts_mlst_task.ts_mlst {
         input: 
-          assembly = pilon.assembly_fasta,
+          assembly = shovill_pe.assembly_fasta,
           samplename = samplename
       }
-      if (genome_annotation == "prokka") {
-        call prokka_task.prokka {
-          input:
-            assembly = pilon.assembly_fasta,
-            samplename = samplename
-        }
-      }
-      if (genome_annotation == "bakta") {
-        call bakta_task.bakta {
-          input:
-            assembly = pilon.assembly_fasta,
-            samplename = samplename
-        }
+      call bakta_task.bakta {
+        input:
+          assembly = shovill_pe.assembly_fasta,
+          samplename = samplename
       }
       call mob_suite_task.mob_recon {
         input:
-          assembly = pilon.assembly_fasta,
+          assembly = shovill_pe.assembly_fasta,
           samplename = samplename
       }
       call taxonomy_qc_task.taxonomy_qc_check {
@@ -255,8 +206,6 @@ workflow gemstone_isolates {
             quast_gc_percent = quast.gc_percent,
             checkm2_completeness = checkm2.completeness,
             checkm2_contamination = checkm2.contamination,
-            ani_highest_percent = ani.ani_highest_percent,
-            ani_highest_percent_bases_aligned = ani.ani_highest_percent_bases_aligned,
             qc_taxonomy_flag = taxonomy_qc_check.qc_check
         }
         # Merge QC flags
@@ -265,7 +214,7 @@ workflow gemstone_isolates {
       call merlin_magic_workflow.merlin_magic {
         input:
           merlin_tag = select_first([expected_taxon, gambit.merlin_tag]),
-          assembly = pilon.assembly_fasta,
+          assembly = shovill_pe.assembly_fasta,
           samplename = samplename,
           read1 = read_QC_trim.read1_clean,
           read2 = read_QC_trim.read2_clean
@@ -276,7 +225,15 @@ workflow gemstone_isolates {
             samplename = samplename,
             read1 = read_QC_trim.read1_clean,
             read2 = read_QC_trim.read2_clean,
-            kraken2_db = kraken2_db
+            kraken2_db = kraken2_db,
+            kraken2_args = "",
+            classified_out = "classified#.fastq",
+            unclassified_out = "unclassified#.fastq",
+            mem = kraken2_mem,
+            cpu = kraken2_cpu,
+            disk_size = kraken2_disk_size,
+            bracken_read_len = bracken_read_len,
+            bracken_classification_level = bracken_classification_level
         }
       }
       if (call_strainge) {
@@ -302,9 +259,7 @@ workflow gemstone_isolates {
   output {
     # Version Captures
     String theiaprok_illumina_pe_version = version_capture.phb_version
-    String theiaprok_illumina_pe_analysis_date = version_capture.date
-    # Read Metadata
-    String seq_platform = seq_method
+    String analysis_date = version_capture.date
     # Sample Screening
     String raw_read_screen = raw_check_reads.read_screen
     String? clean_read_screen = clean_check_reads.read_screen
@@ -318,8 +273,6 @@ workflow gemstone_isolates {
     String? num_reads_clean_pairs = read_QC_trim.fastq_scan_clean_pairs
     # Read QC - trimmomatic outputs
     String? trimmomatic_version = read_QC_trim.trimmomatic_version
-    # Read QC - fastp outputs
-    String? fastp_version = read_QC_trim.fastp_version
     # Read QC - bbduk outputs
     File? read1_clean = read_QC_trim.read1_clean
     File? read2_clean = read_QC_trim.read2_clean
@@ -333,35 +286,11 @@ workflow gemstone_isolates {
     Float? r2_mean_readlength_raw = cg_pipeline_raw.r2_mean_readlength
     Float? combined_mean_readlength_raw = cg_pipeline_raw.combined_mean_readlength
     Float? combined_mean_readlength_clean = cg_pipeline_clean.combined_mean_readlength
-    # Read QC - midas outputs
-    String? midas_docker = read_QC_trim.midas_docker
-    File? midas_report = read_QC_trim.midas_report
-    String? midas_primary_genus = read_QC_trim.midas_primary_genus
-    String? midas_secondary_genus = read_QC_trim.midas_secondary_genus
-    Float? midas_secondary_genus_abundance = read_QC_trim.midas_secondary_genus_abundance
     # Assembly - shovill outputs 
-    File? raw_assembly_fasta = shovill_pe.assembly_fasta
-    File? raw_contigs_gfa = shovill_pe.contigs_gfa
-    File? raw_contigs_fastg = shovill_pe.contigs_fastg
-    File? raw_contigs_lastgraph = shovill_pe.contigs_lastgraph
+    File? assembly_fasta = shovill_pe.assembly_fasta
+    File? raw_assembly_gfa = shovill_pe.contigs_gfa
     String? shovill_pe_version = shovill_pe.shovill_version
-    # Assembly - pilon outputs
-    File? assembly_fasta = pilon.assembly_fasta
-    File? pilon_changes = pilon.changes
-    File? pilon_vcf = pilon.vcf
-    String? pilon_version = pilon.pilon_version
-    # Alignment - bwa pre-pilon outputs
-    String? bwa_version = bwa_pre_pilon.bwa_version
-    String? sam_version = bwa_pre_pilon.sam_version
-    File? raw_assembly_alignment_bam = bwa_pre_pilon.sorted_bam
-    File? raw_assembly_alignment_index = bwa_pre_pilon.sorted_bai
-    File? raw_assembly_alignment_read1 = bwa_pre_pilon.read1_aligned
-    File? raw_assembly_alignment_read2 = bwa_pre_pilon.read2_aligned
-    # Alignment - bwa post-pilon outputs
-    File? assembly_alignment_bam = bwa_post_pilon.sorted_bam
-    File? assembly_alignment_index = bwa_post_pilon.sorted_bai
-    File? assembly_alignment_read1 = bwa_post_pilon.read1_aligned
-    File? assembly_alignment_read2 = bwa_post_pilon.read2_aligned
+    File? pilon_vcf = shovill_pe.pilon_vcf
     # Assembly QC - quast outputs
     File? quast_report = quast.quast_report
     String? quast_version = quast.version
@@ -388,12 +317,6 @@ workflow gemstone_isolates {
     String? gambit_version = gambit.gambit_version
     String? gambit_db_version = gambit.gambit_db_version
     String? gambit_docker = gambit.gambit_docker
-    # ani-mummer outputs
-    Float? ani_highest_percent = ani.ani_highest_percent
-    Float? ani_highest_percent_bases_aligned = ani.ani_highest_percent_bases_aligned
-    File? ani_output_tsv = ani.ani_output_tsv
-    String? ani_top_species_match = ani.ani_top_species_match
-    String? ani_mummer_version = ani.ani_mummer_version
     # kmerfinder outputs
     String? kmerfinder_docker = kmerfinder.kmerfinder_docker
     File? kmerfinder_results_tsv = kmerfinder.kmerfinder_results_tsv
@@ -414,15 +337,6 @@ workflow gemstone_isolates {
     String? amrfinderplus_amr_subclasses = amrfinderplus_task.amrfinderplus_amr_subclasses
     String? amrfinderplus_version = amrfinderplus_task.amrfinderplus_version
     String? amrfinderplus_db_version = amrfinderplus_task.amrfinderplus_db_version
-    # Resfinder Outputs
-    File? resfinder_pheno_table = resfinder_task.resfinder_pheno_table
-    File? resfinder_pheno_table_species = resfinder_task.resfinder_pheno_table_species
-    File? resfinder_seqs = resfinder_task.resfinder_hit_in_genome_seq
-    File? resfinder_results = resfinder_task.resfinder_results_tab
-    File? resfinder_pointfinder_pheno_table = resfinder_task.pointfinder_pheno_table
-    File? resfinder_pointfinder_results = resfinder_task.pointfinder_results
-    String? resfinder_db_version = resfinder_task.resfinder_db_version
-    String? resfinder_docker = resfinder_task.resfinder_docker
     # MLST Typing
     File? ts_mlst_results = ts_mlst.ts_mlst_results
     String? ts_mlst_predicted_st = ts_mlst.ts_mlst_predicted_st
@@ -431,10 +345,6 @@ workflow gemstone_isolates {
     String? ts_mlst_version = ts_mlst.ts_mlst_version
     File? ts_mlst_novel_alleles = ts_mlst.ts_mlst_novel_alleles
     String? ts_mlst_docker = ts_mlst.ts_mlst_docker
-    # Prokka Results
-    File? prokka_gff = prokka.prokka_gff
-    File? prokka_gbk = prokka.prokka_gbk
-    File? prokka_sqn = prokka.prokka_sqn
     # Bakta Results
     File? bakta_gbff = bakta.bakta_gbff
     File? bakta_gff3 = bakta.bakta_gff3
@@ -682,16 +592,16 @@ workflow gemstone_isolates {
     Float? kraken2_percent_human = kraken.kraken2_percent_human
     File? bracken_report = kraken.bracken_report
     # StrainGE Results
-    File? straingst_kmerized_reads = strainge.straingst_kmerized_reads
-    File? straingst_reference_db = strainge.straingst_selected_db
+    Array[File]? straingst_kmerized_reads = strainge.straingst_kmerized_reads
+    Array[File]? straingst_reference_db = strainge.straingst_selected_db
     Boolean? straingst_found_db = strainge.straingst_found_db
-    File? straingst_strains = strainge.straingst_strains
-    File? straingst_statistics = strainge.straingst_statistics
-    File? straingr_concat_fasta = strainge.straingr_concat_fasta
-    File? straingr_read_alignment = strainge.straingr_read_alignment
-    File? straingr_variants = strainge.straingr_variants
-    File? straingr_report = strainge.straingr_report
-    String? strainge_docker = strainge.strainge_docker
-    String? strainge_version = strainge.strainge_version
+    Array[File]? straingst_strains = strainge.straingst_strains
+    Array[File]? straingst_statistics = strainge.straingst_statistics
+    Array[File]? straingr_concat_fasta = strainge.straingr_concat_fasta
+    Array[File]? straingr_read_alignment = strainge.straingr_read_alignment
+    Array[File]? straingr_variants = strainge.straingr_variants
+    Array[File]? straingr_report = strainge.straingr_report
+    Array[String]? strainge_docker = strainge.strainge_docker
+    Array[String]? strainge_version = strainge.strainge_version
   }
 }
