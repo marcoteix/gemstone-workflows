@@ -290,7 +290,6 @@ workflow gemstone_isolates {
     File? assembly_fasta = shovill_pe.assembly_fasta
     File? raw_assembly_gfa = shovill_pe.contigs_gfa
     String? shovill_pe_version = shovill_pe.shovill_version
-    File? pilon_vcf = shovill_pe.pilon_vcf
     # Assembly QC - quast outputs
     File? quast_report = quast.quast_report
     String? quast_version = quast.version

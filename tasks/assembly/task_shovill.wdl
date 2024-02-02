@@ -55,9 +55,6 @@ task shovill_pe {
       --keepfiles
 
     mv out/contigs.fa out/~{samplename}_contigs.fasta
-    echo "pilon dir: $(ls pilon)"
-    echo "cwd: $(ls)"
-    mv pilon/pilon.vcf out/~{samplename}_pilon.vcf
 
     if [ "~{assembler}" == "spades" ] ; then
       mv out/contigs.gfa out/~{samplename}_contigs.gfa
@@ -73,7 +70,6 @@ task shovill_pe {
     File? contigs_fastg = "out/~{samplename}_contigs.fastg"
     File? contigs_lastgraph = "out/~{samplename}_contigs.LastGraph"
     String shovill_version = read_string("VERSION")
-    File? pilon_vcf = "out/~{samplename}_pilon.vcf"
   }
   runtime {
     docker: "~{docker}"
