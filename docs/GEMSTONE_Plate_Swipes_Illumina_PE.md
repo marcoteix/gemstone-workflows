@@ -10,23 +10,13 @@ This workflow was based on the [PHB v1.0.0 TheiaMeta workflow](https://theiagen.
 
 ## Inputs
 <details open>
-<summary></summary>
+<summary>Click to open or hide</summary>
 
-### Sample data
-    
-#### read1 
-`File` `Required` FASTQ file with forward raw reads. Must be Illumina paired-end.
-
-#### read2
-`File` `Required` FASTQ file with reverse raw reads. Must be Illumina paired-end.
-
-#### samplename 
-`String` `Required` Name or ID of the sample.
-
-#### lab_determined_genus 
-`String` `Required` Genus or species name, as determined in the lab or by GAMBIT. Must be written in full, with whitespaces (e.g., *Escherichia coli* and not *E. coli* nor *Escherichia_coli*). Used to select a StrainGE reference database by matching the genus passed in this parameter with those in each database. Multiple genera are supported through a "/" separator, such as "Escherichia/Klebsiella" - this will call StrainGE twice, once using an Escherichia database, and once with a Klebsiella database.
 
 ### Workflow options
+
+<details open>
+<summary>Click to open or hide</summary>
 
 #### output_aditional_files
 `Boolean` `Optional` `Default = false` If `true`, aligns reads to the assembly, computes coverage, and retrieves aligned and unaligned reads.
@@ -43,7 +33,31 @@ This workflow was based on the [PHB v1.0.0 TheiaMeta workflow](https://theiagen.
 #### call_metawrap
 `Boolean` `Optional` `Default = false` If `true`, performs genome binning and refinement of bins with metaWRAP.
 
+</details>
+
+### Sample data
+
+<details open>
+<summary>Click to open or hide</summary>
+    
+#### read1 
+`File` `Required` FASTQ file with forward raw reads. Must be Illumina paired-end.
+
+#### read2
+`File` `Required` FASTQ file with reverse raw reads. Must be Illumina paired-end.
+
+#### samplename 
+`String` `Required` Name or ID of the sample.
+
+#### lab_determined_genus 
+`String` `Required` Genus or species name, as determined in the lab or by GAMBIT. Must be written in full, with whitespaces (e.g., *Escherichia coli* and not *E. coli* nor *Escherichia_coli*). Used to select a StrainGE reference database by matching the genus passed in this parameter with those in each database. Multiple genera are supported through a "/" separator, such as "Escherichia/Klebsiella" - this will call StrainGE twice, once using an Escherichia database, and once with a Klebsiella database.
+
+</details>
+
 ### Strain-level detection
+
+<details open>
+<summary>Click to open or hide</summary>
 
 #### strainge_db_config
 `File` `Required` TSV configuration file for StrainGE databases. It should be a table with two columns: one with the database genus name (e.g., *Escherichia* or *Proteus*), and another with the path to the tar archive with the StrainGE database for that genus. An example of this table is:
@@ -102,7 +116,12 @@ This workflow was based on the [PHB v1.0.0 TheiaMeta workflow](https://theiagen.
 #### strainge_db_kmer_size
 `Int` `Optional` `Default = 23` K-mer sized used when creating the StrainGST databases.
 
+</details>
+
 ### Taxonomy assignment
+
+<details open>
+<summary>Click to open or hide</summary>
 
 #### kraken2_db
 `File` `Optional` Compressed Kraken2/Bracken database as a tar archive. Required if `call_kraken` is `true`. Please make sure that the archive contains all the files needed to run Bracken (refer to the [Bracken docs](https://github.com/jenniferlu717/Bracken)).
@@ -122,7 +141,12 @@ This workflow was based on the [PHB v1.0.0 TheiaMeta workflow](https://theiagen.
 #### kraken2_mem
 `Int` `Optional` `Default = 32` RAM in Gb for the Kraken2/Bracken task task.
 
+</details>
+
 ### MAG binning
+
+<details open>
+<summary>Click to open or hide</summary>
 
 #### metawrap_checkm_db
 `File` `Optional` Compressed checkM database as a tar archive to be used in metaWRAP. Required if `call_metawrap` is `true`.
@@ -140,10 +164,12 @@ This workflow was based on the [PHB v1.0.0 TheiaMeta workflow](https://theiagen.
 `String` `Optional` `Default = "--metabat2 --maxbin2 --concoct"` Contig binning tools used in metaWRAP, as flags. These flags are used in the metaWRAP *binning* command.
 
 </details>
+</details>
 
 ## Outputs
+
 <details open>
-<summary></summary>
+<summary>Click to open or hide</summary>
 
 #### theiameta_illumina_pe_version
 `String` Version of the TheiaMeta workflow used.
@@ -151,7 +177,10 @@ This workflow was based on the [PHB v1.0.0 TheiaMeta workflow](https://theiagen.
 #### analysis_date
 `String` Analysis date.
 
-### Taxonomy assignment
+### Taxon identification
+
+<details open>
+<summary>Click to open or hide</summary>
 
 #### kraken2_version
 `String` `Optional`
@@ -171,11 +200,14 @@ Kraken2 version used.
 `File` `Optional` Bracken report with estimated abundances per taxon.
 
 #### bracken_version
-`String` `Optional`
- 
-Bracken version used.
+`String` `Optional` Bracken version used.
+
+</details>
 
 ### Read QC
+
+<details open>
+<summary>Click to open or hide</summary>
 
 #### read1_dehosted
 `File` `Optional`
@@ -232,7 +264,12 @@ FASTQ file of reverse reads with human reads removed.
 #### average_read_length
 `Float` Average length in bp of clean reads (`read1_clean` and `read2_clean`).
 
+</details>
+
 ### MAG and assembly QC
+
+<details open>
+<summary>Click to open or hide</summary>
 
 #### assembly_fasta
 `File` FASTA file of the final assembly (MAG). If no `reference` is used, it is the output from metaSPAdes + Pilon.
@@ -303,7 +340,12 @@ FASTQ file of reverse reads with human reads removed.
 #### percentage_mapped_reads
 `Float` `Optional` Percentage of mapped reads to the assembly. Returned only if `output_additional_files` is `true`.
 
+</details>
+
 ### Strain-level detection
+
+<details open>
+<summary>Click to open or hide</summary>
 
 #### straingst_kmerized_reads
 `Array[File]` `Optional` Files with k-merized input reads. The size of the array depends on how many genera are assigned in `lab_determined_genus`, but the contents of each file should be the same. Returned only if `call_strainge` and `straingst_found_db` are `true`.
@@ -338,7 +380,12 @@ FASTQ file of reverse reads with human reads removed.
 #### strainge_version
 `Array[String]` `Optional` Version of StrainGE used for strain-level detection. The size of the array depends on how many genera are assigned in `lab_determined_genus`. Returned only if `call_strainge` is `true`.
 
+</details>
+
 ### Gene annotation
+
+<details open>
+<summary>Click to open or hide</summary>
 
 #### bakta_gbff
 `File` MAG gene annotations from Bakta in GenBank format.
@@ -355,7 +402,12 @@ FASTQ file of reverse reads with human reads removed.
 #### bakta_version
 `String` Version of Bakta used for MAG gene annotation.
 
+</details>
+
 ### Plasmid identification
+
+<details open>
+<summary>Click to open or hide</summary>
 
 #### mob_recon_results
 `File` TSV file with plasmid/chromosome classification of contigs from MOB-recon.
@@ -375,7 +427,12 @@ FASTQ file of reverse reads with human reads removed.
 #### mob_recon_version
 `String` Version of MOB-recon/MOB-suite used for plasmid identification.
 
+</details>
+
 ### AMR genotyping
+
+<details open>
+<summary>Click to open or hide</summary>
 
 #### amrfinderplus_all_report
 `File` Report of all genes (virulence, stress, and AMR) found by AMRFinderPlus, as a TSV file.
@@ -413,7 +470,12 @@ FASTQ file of reverse reads with human reads removed.
 #### amrfinderplus_db_version
 `String` Version of AMRFinderPlus database used for AMR genotyping.
 
+</details>
+
 ### MAG binning
+
+<details open>
+<summary>Click to open or hide</summary>
 
 #### metawrap_docker
 `String` `Optional` Name of the metaWRAP Docker image used for MAG binning and bin refinement. Returned only if `call_metawrap` is `true`.
@@ -436,6 +498,7 @@ FASTQ file of reverse reads with human reads removed.
 #### metawrap_contigs
 `File` `Optional` Bin assignments to each contig in the MAG, as a TSV file. Returned only if `call_metawrap` is `true`.
 
+</details>
 </details>
 
 ## Authors
