@@ -15,6 +15,8 @@ import "../standalone_modules/wf_strainge_pe.wdl" as strainge_wf
 
 workflow gemstone_plate_swipes {
   meta {
+    author: "Marco Teixeira"
+    email: "mcarvalh@broadinstitute.org"
     description: "Reference-based consensus calling or de novo assembly for metagenomic sequencing data with the TheiaMeta Illumina PE workflow from Theiagen PHB. Strain-level detection, genome binning, taxonomy assignment, and AMR genotyping."
   }
   input {
@@ -194,7 +196,7 @@ workflow gemstone_plate_swipes {
   }
   output {
     # Version capture
-    String theiameta_illumina_pe_version = version_capture.phb_version
+    String gemstone_wf_version = version_capture.wf_version
     String analysis_date = version_capture.date
     # Kraken2 outputs
     String? kraken2_version = kraken2_clean.kraken2_version

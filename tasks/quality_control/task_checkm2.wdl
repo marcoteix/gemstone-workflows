@@ -4,7 +4,7 @@ task checkm2 {
     input {
         File assembly
         String samplename
-        String docker = "marcoteix/checkm2:0.0.1"
+        String docker = "marcoteix/checkm2:1.0.0"
         Int cpu = 8
         Int memory = 32
         Int disk_size = 100

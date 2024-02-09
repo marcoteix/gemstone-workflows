@@ -70,7 +70,7 @@ task kraken2_standalone {
     File? read2
     File kraken2_db # as a tar.gz file
     String samplename
-    String docker = "marcoteix/bracken:0.0.1"
+    String docker = "marcoteix/bracken:1.0.0"
     String kraken2_args = ""
     String classified_out = "classified#.fastq"
     String unclassified_out = "unclassified#.fastq"

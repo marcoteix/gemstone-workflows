@@ -258,7 +258,7 @@ workflow gemstone_isolates {
   }
   output {
     # Version Captures
-    String theiaprok_illumina_pe_version = version_capture.phb_version
+    String gemstone_wf_version = version_capture.wf_version
     String analysis_date = version_capture.date
     # Sample Screening
     String raw_read_screen = raw_check_reads.read_screen

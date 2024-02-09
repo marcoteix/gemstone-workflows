@@ -17,7 +17,7 @@ workflow gambit_query {
     input:
   }
   output {
-    String gambit_query_wf_version = version_capture.phb_version
+    String gambit_query_wf_version = version_capture.wf_version
     String gambit_query_wf_analysis_date = version_capture.date
     #Taxon ID
     File gambit_report = gambit.gambit_report_file

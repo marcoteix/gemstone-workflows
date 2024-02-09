@@ -1,9 +1,12 @@
 version 1.0
 
 import "../../tasks/taxon_id/task_metawrap.wdl" as metawrap_task
+import "../../tasks/task_versioning.wdl" as versioning
 
 workflow metawrap_pe_wf {
   meta {
+    author: "Marco Teixeira"
+    email: "mcarvalh@broadinstitute.org"
     description: "Assembly binning with metaWRAP."
   }
   input {
@@ -29,7 +32,12 @@ workflow metawrap_pe_wf {
       checkm_database = checkm_database,
       binning_flags = binning_flags
   }
+  call versioning.version_capture{
+    input:
+  }
   output {
+    String metawrap_pe_wf_version = version_capture.wf_version
+    String metawrap_pe_wf_analysis_date = version_capture.date
     String metawrap_docker = metawrap.metawrap_docker
     String metawrap_version = metawrap.metawrap_version
     String metawrap_analysis_date = metawrap.analysis_date

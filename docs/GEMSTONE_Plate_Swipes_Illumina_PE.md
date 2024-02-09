@@ -6,7 +6,7 @@ This workflow processes paired-end Illumina reads from plate swipes/plate bacter
 
 This workflow was based on the [PHB v1.0.0 TheiaMeta workflow](https://theiagen.notion.site/TheiaMeta-7e73c010559148b380144d7c3b3ec4e6) from Theiagen.
 
-![GEMSTONE_Plate_Swipes_Illumina_PE workflow diagram](figures/GEMSTONE_Plate_Swipes_Illumina_PE.svg "GEMSTONE_Plate_Swipes_Illumina_PE workflow diagram")
+![GEMSTONE_Plate_Swipes_Illumina_PE workflow diagram](https://github.com/marcoteix/gemstone-workflows/blob/main/docs/figures/GEMSTONE_Plate_Swipes_Illumina_PE.svg "GEMSTONE_Plate_Swipes_Illumina_PE workflow diagram")
 
 ## Inputs
 <details open>
@@ -511,4 +511,4 @@ __Colin Worby__
 
 <span style="font-size:80%; margin-top:0px"> cworby@broadinstitute.org </span>
 
-<img src="figures/GEMSTONE logo.png" alt="GEMSTONE logo" width=30%>
+<img src="https://github.com/marcoteix/gemstone-workflows/blob/main/docs/figures/GEMSTONE%20logo.png" alt="GEMSTONE logo" width=30%>

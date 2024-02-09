@@ -7,7 +7,7 @@ task strainge {
     File reads_2
     Int kmer_size
     File strainge_db
-    String docker = "marcoteix/strainge:0.0.2"
+    String docker = "marcoteix/strainge:1.0.0"
     Int disk_size = 100
     Int cpus = 4
     Int memory = 16

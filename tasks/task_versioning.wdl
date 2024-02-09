@@ -9,14 +9,14 @@ task version_capture {
     volatile: true
   }
   command {
-    PHB_Version="PHB v1.2.1"
+    WF_Version="v1.0.0 (PHB v1.2.1)"
     ~{default='' 'export TZ=' + timezone}
     date +"%Y-%m-%d" > TODAY
-    echo "$PHB_Version" > PHB_VERSION
+    echo "$WF_Version" > WF_VERSION
   }
   output {
     String date = read_string("TODAY")
-    String phb_version = read_string("PHB_VERSION")
+    String wf_version = read_string("WF_VERSION")
   }
   runtime {
     memory: "1 GB"

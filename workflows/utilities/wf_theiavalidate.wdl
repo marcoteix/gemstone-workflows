@@ -50,7 +50,7 @@ workflow theiavalidate {
     input:
   }
   output {
-    String theiavalidate_version = version_capture.phb_version
+    String theiavalidate_version = version_capture.wf_version
     String theiavalidate_date = version_capture.date
     File? validation_report = compare_two_tsvs.pdf_report
     File? validation_differences_table = compare_two_tsvs.excel_report

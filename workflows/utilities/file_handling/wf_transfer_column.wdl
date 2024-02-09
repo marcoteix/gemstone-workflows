@@ -17,7 +17,7 @@ workflow transfer_column_content {
     input:
   }
   output {
-    String transfer_column_content_version = version_capture.phb_version
+    String transfer_column_content_version = version_capture.wf_version
     String transfer_column_content_analysis_date = version_capture.date
 
     File transferred_files = transfer_files.transferred_files

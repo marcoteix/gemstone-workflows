@@ -2,9 +2,12 @@ version 1.0
 
 import "../../tasks/taxon_id/task_strainge.wdl" as strainge
 import "../../tasks/taxon_id/task_select_strainge_db.wdl" as select_db
+import "../../tasks/task_versioning.wdl" as versioning
 
 workflow strainge_pe_wf {
   meta {
+    author: "Marco Teixeira"
+    email: "mcarvalh@broadinstitute.org"
     description: "Strain-level detection with StrainGE."
   }
   input {
@@ -41,7 +44,12 @@ workflow strainge_pe_wf {
       }
     }
   }
+  call versioning.version_capture{
+    input:
+  }
   output {
+    String strainge_pe_wf_version = version_capture.wf_version
+    String strainge_pe_wf_analysis_date = version_capture.date
     Array[File]? straingst_kmerized_reads = strainge_isolate.straingst_kmerized_reads
     Array[File] straingst_selected_db = select_reference_db.selected_db
     Boolean straingst_found_db = select_reference_db.found_db

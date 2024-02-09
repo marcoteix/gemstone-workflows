@@ -59,7 +59,7 @@ workflow czgenepi_prep {
   output {
     File concatenated_czgenepi_fasta = czgenepi_wrangling.concatenated_fasta
     File concatenated_czgenepi_metadata = czgenepi_wrangling.concatenated_metadata
-    String czgenepi_prep_version = version_capture.phb_version
+    String czgenepi_prep_version = version_capture.wf_version
     String czgenepi_prep_analysis_date = version_capture.date
   }
 }

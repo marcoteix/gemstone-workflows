@@ -5,6 +5,8 @@ import "../../tasks/task_versioning.wdl" as versioning
 
 workflow kraken2_pe_wf {
   meta {
+    author: "Marco Teixeira"
+    email: "mcarvalh@broadinstitute.org"
     description: "Classify paired-end reads using Kraken2. Estimate abundances with Bracken."
   }
   input {
@@ -36,17 +38,17 @@ workflow kraken2_pe_wf {
     input:
   }
   output {
-    # PHBG Version Captures
-    String kraken2_pe_wf_version = version_capture.phb_version
+    # Version Captures
+    String kraken2_pe_wf_version = version_capture.wf_version
     String kraken2_pe_wf_analysis_date = version_capture.date
     # Kraken2
     String kraken2_version = kraken2_pe.kraken2_version
     String kraken2_docker = kraken2_pe.kraken2_docker
     File kraken2_report = kraken2_pe.kraken2_report
     File kraken2_classified_report = kraken2_pe.kraken2_classified_report
-    File? kraken2_unclassified_read1 = kraken2_pe.kraken2_unclassified_read1
+    File kraken2_unclassified_read1 = kraken2_pe.kraken2_unclassified_read1
     File? kraken2_unclassified_read2 = kraken2_pe.kraken2_unclassified_read2
-    File? kraken2_classified_read1 = kraken2_pe.kraken2_classified_read1
+    File kraken2_classified_read1 = kraken2_pe.kraken2_classified_read1
     File? kraken2_classified_read2 = kraken2_pe.kraken2_classified_read2
     Float kraken2_percent_human = kraken2_pe.kraken2_percent_human
     File bracken_report = kraken2_pe.bracken_report

@@ -27,7 +27,7 @@ workflow assembly_fetch {
   }
   output {
     # version capture
-    String assembly_fetch_version = version_capture.phb_version
+    String assembly_fetch_version = version_capture.wf_version
     String assembly_fetch_analysis_date = version_capture.date
     # referenceseeker outputs
     String? assembly_fetch_referenceseeker_top_hit_ncbi_accession = referenceseeker.referenceseeker_top_hit_ncbi_accession
