@@ -68,7 +68,6 @@ task kraken2_standalone {
   input {
     File read1
     File? read2
-    File kraken2_db # as a tar.gz file
     String samplename
     String docker = "marcoteix/bracken:1.0.0"
     String kraken2_args = ""
@@ -85,15 +84,11 @@ task kraken2_standalone {
     echo $(kraken2 --version 2>&1) | sed 's/^.*Kraken version //;s/ .*$//' | tee KRAKEN_VERSION
     date | tee DATE
 
-    # Decompress the Kraken2 database
-    mkdir db
-    tar -C ./db/ -xzvf ~{kraken2_db}  
-
     mode="--paired"
 
     # Run Kraken2
     kraken2 $mode \
-        --db ./db/ \
+        --db "gs://fc-secure-7751772e-8b9f-48be-9267-d7a815a23b02/databases/kraken_test" \
         --threads ~{cpu} \
         --report ~{samplename}.report.txt \
         --gzip-compressed \
@@ -122,7 +117,7 @@ task kraken2_standalone {
 
     # Run bracken
     bracken -v | cut -d ' ' -f2 > BRACKEN_VERSION
-    bracken -d ./db/ -i ~{samplename}.report.txt -o ~{samplename}.bracken.txt \
+    bracken -d "gs://fc-secure-7751772e-8b9f-48be-9267-d7a815a23b02/databases/kraken_test" -i ~{samplename}.report.txt -o ~{samplename}.bracken.txt \
       -r ~{bracken_read_len} -l ~{bracken_classification_level} -t ~{bracken_min_reads}
 
   >>>

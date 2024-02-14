@@ -21,6 +21,8 @@ import "../standalone_modules/wf_strainge_pe.wdl" as strainge_wf
 
 workflow gemstone_isolates {
   meta {
+    author: "Marco Teixeira"
+    email: "mcarvalh@broadinstitute.org"
     description: "Pipeline for bacterial isolates, based on the TheiaProk workflow by Theiagen."
   }
   input {
