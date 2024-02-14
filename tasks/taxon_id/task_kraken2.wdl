@@ -69,6 +69,7 @@ task kraken2_standalone {
     File read1
     File? read2
     String samplename
+    String kraken2_db = "gs://fc-secure-7751772e-8b9f-48be-9267-d7a815a23b02/databases/kraken_test"
     String docker = "marcoteix/bracken:1.0.0"
     String kraken2_args = ""
     String classified_out = "classified#.fastq"
@@ -88,7 +89,7 @@ task kraken2_standalone {
 
     # Run Kraken2
     kraken2 $mode \
-        --db "gs://fc-secure-7751772e-8b9f-48be-9267-d7a815a23b02/databases/kraken_test" \
+        --db ~{kraken2_db} \
         --threads ~{cpu} \
         --report ~{samplename}.report.txt \
         --gzip-compressed \
@@ -117,7 +118,7 @@ task kraken2_standalone {
 
     # Run bracken
     bracken -v | cut -d ' ' -f2 > BRACKEN_VERSION
-    bracken -d "gs://fc-secure-7751772e-8b9f-48be-9267-d7a815a23b02/databases/kraken_test" -i ~{samplename}.report.txt -o ~{samplename}.bracken.txt \
+    bracken -d ~{kraken2_db} -i ~{samplename}.report.txt -o ~{samplename}.bracken.txt \
       -r ~{bracken_read_len} -l ~{bracken_classification_level} -t ~{bracken_min_reads}
 
   >>>
