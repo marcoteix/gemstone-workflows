@@ -26,7 +26,7 @@ task strainge {
     /opt/conda/envs/strainge/bin/straingst kmerize -k ~{kmer_size} -o ~{samplename}_kmerized_reads.hdf5 ~{reads_1} ~{reads_2}
     echo run -O -o ~{samplename}_straingst_results $hdf5 ~{samplename}_kmerized_reads.hdf5
     /opt/conda/envs/strainge/bin/straingst run -i ~{max_strains} -O -o ~{samplename}_straingst_results $hdf5 ~{samplename}_kmerized_reads.hdf5
-    if [ ~{prepare_straingr} ]; then
+    if [ "~{prepare_straingr}" = true ]; then
     /opt/conda/envs/strainge/bin/straingr prepare-ref -s ~{samplename}_straingst_results.strains.tsv -p "$fastas_dir/{ref}.fa.gz" \
         -S "$similarities" -o ~{samplename}_refs_concat.fasta
     /opt/conda/envs/strainge/bin/bwa index ~{samplename}_refs_concat.fasta
