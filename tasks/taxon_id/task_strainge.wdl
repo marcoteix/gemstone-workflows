@@ -16,7 +16,7 @@ task strainge {
   command <<<
     # Decompress reference database
     mkdir database
-    tar -C ./database/ -xzvf ~{strainge_db}
+    tar --zstd -C ./database/ -xf ~{strainge_db}
     fastas_dir="database/FASTA"
     similarities="database/similarities.tsv"
     hdf5=$(dir database/*.hdf5)
