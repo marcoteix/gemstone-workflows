@@ -34,6 +34,7 @@ workflow gemstone_plate_swipes {
     Int strainge_cpus = 4
     Int strainge_memory = 128
     Int strainge_db_kmer_size = 23
+    Boolean strainge_prepare_straingr = false
     # Kraken options
     Boolean call_kraken2 = false
     File kraken2_db
@@ -174,7 +175,8 @@ workflow gemstone_plate_swipes {
         strainge_memory = strainge_memory,
         strainge_max_strains = strainge_max_strains,
         strainge_db_config = strainge_db_config,
-        predicted_taxonomy = lab_determined_genus
+        predicted_taxonomy = lab_determined_genus,
+        strainge_prepare_straingr = strainge_prepare_straingr
     }
   }
   if (call_metawrap) {
@@ -265,10 +267,10 @@ workflow gemstone_plate_swipes {
     Boolean? straingst_found_db = strainge.straingst_found_db
     Array[File]? straingst_strains = strainge.straingst_strains
     Array[File]? straingst_statistics = strainge.straingst_statistics
-    Array[File]? straingr_concat_fasta = strainge.straingr_concat_fasta
-    Array[File]? straingr_read_alignment = strainge.straingr_read_alignment
-    Array[File]? straingr_variants = strainge.straingr_variants
-    Array[File]? straingr_report = strainge.straingr_report
+    Array[File?]? straingr_concat_fasta = strainge.straingr_concat_fasta
+    Array[File?]? straingr_read_alignment = strainge.straingr_read_alignment
+    Array[File?]? straingr_variants = strainge.straingr_variants
+    Array[File?]? straingr_report = strainge.straingr_report
     Array[String]? strainge_docker = strainge.strainge_docker
     Array[String]? strainge_version = strainge.strainge_version
     # Bakta outputs

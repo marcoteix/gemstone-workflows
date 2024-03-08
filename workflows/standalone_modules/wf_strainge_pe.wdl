@@ -21,6 +21,7 @@ workflow strainge_pe_wf {
     Int strainge_cpus = 4
     Int strainge_memory = 128
     Int strainge_max_strains = 5
+    Boolean strainge_prepare_straingr = false
   }
   call select_db.select_reference_db_lite as select_reference_db {
     input:
@@ -40,7 +41,8 @@ workflow strainge_pe_wf {
             disk_size = strainge_disk_size,
             cpus = strainge_cpus,
             memory = strainge_memory,
-            max_strains = strainge_max_strains
+            max_strains = strainge_max_strains,
+            prepare_straingr = strainge_prepare_straingr
       }
     }
   }
@@ -55,10 +57,10 @@ workflow strainge_pe_wf {
     Boolean straingst_found_db = select_reference_db.found_db
     Array[File]? straingst_strains = strainge_isolate.straingst_strains
     Array[File]? straingst_statistics = strainge_isolate.straingst_statistics
-    Array[File]? straingr_concat_fasta = strainge_isolate.straingr_concat_fasta
-    Array[File]? straingr_read_alignment = strainge_isolate.straingr_read_alignment
-    Array[File]? straingr_variants = strainge_isolate.straingr_variants
-    Array[File]? straingr_report = strainge_isolate.straingr_report
+    Array[File?]? straingr_concat_fasta = strainge_isolate.straingr_concat_fasta
+    Array[File?]? straingr_read_alignment = strainge_isolate.straingr_read_alignment
+    Array[File?]? straingr_variants = strainge_isolate.straingr_variants
+    Array[File?]? straingr_report = strainge_isolate.straingr_report
     Array[String]? strainge_docker = strainge_isolate.strainge_docker
     Array[String]? strainge_version = strainge_isolate.strainge_version
   }
