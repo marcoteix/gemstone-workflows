@@ -12,6 +12,7 @@ task strainge {
     Int cpus = 4
     Int memory = 16
     Int max_strains = 5
+    Boolean prepare_straingr = false
   }
   command <<<
     # Decompress reference database
@@ -25,6 +26,7 @@ task strainge {
     /opt/conda/envs/strainge/bin/straingst kmerize -k ~{kmer_size} -o ~{samplename}_kmerized_reads.hdf5 ~{reads_1} ~{reads_2}
     echo run -O -o ~{samplename}_straingst_results $hdf5 ~{samplename}_kmerized_reads.hdf5
     /opt/conda/envs/strainge/bin/straingst run -i ~{max_strains} -O -o ~{samplename}_straingst_results $hdf5 ~{samplename}_kmerized_reads.hdf5
+    if [ ~{prepare_straingr} ]; then
     /opt/conda/envs/strainge/bin/straingr prepare-ref -s ~{samplename}_straingst_results.strains.tsv -p "$fastas_dir/{ref}.fa.gz" \
         -S "$similarities" -o ~{samplename}_refs_concat.fasta
     /opt/conda/envs/strainge/bin/bwa index ~{samplename}_refs_concat.fasta
@@ -32,16 +34,17 @@ task strainge {
     /opt/conda/envs/strainge/bin/samtools index ~{samplename}_straingr_alignment.bam
     /opt/conda/envs/strainge/bin/straingr call ~{samplename}_refs_concat.fasta ~{samplename}_straingr_alignment.bam --hdf5-out \
         ~{samplename}_straingr_variants.hdf5 --summary ~{samplename}_straingr.tsv --tracks all
+    fi
   >>>
   output {
     File straingst_kmerized_reads = "~{samplename}_kmerized_reads.hdf5"
     File straingst_reference_db_used = "~{strainge_db}"
     File straingst_strains = "~{samplename}_straingst_results.strains.tsv"
     File straingst_statistics = "~{samplename}_straingst_results.stats.tsv"
-    File straingr_concat_fasta = "~{samplename}_refs_concat.fasta"
-    File straingr_read_alignment = "~{samplename}_straingr_alignment.bam"
-    File straingr_variants = "~{samplename}_straingr_variants.hdf5"
-    File straingr_report = "~{samplename}_straingr.tsv"
+    File? straingr_concat_fasta = "~{samplename}_refs_concat.fasta"
+    File? straingr_read_alignment = "~{samplename}_straingr_alignment.bam"
+    File? straingr_variants = "~{samplename}_straingr_variants.hdf5"
+    File? straingr_report = "~{samplename}_straingr.tsv"
     String strainge_docker = "~{docker}"    
     String strainge_version = read_string("VERSION.txt")
   }

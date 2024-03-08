@@ -60,6 +60,7 @@ workflow gemstone_isolates {
     Float contamination_threshold = 2
     # StrainGE options
     Boolean call_strainge = false
+    Boolean strainge_prepare_straingr = false
     Int strainge_db_kmer_size = 23
     File strainge_db_config
     Int strainge_max_strains = 2
@@ -247,7 +248,8 @@ workflow gemstone_isolates {
             strainge_db_kmer_size = strainge_db_kmer_size,
             strainge_max_strains = strainge_max_strains,
             strainge_db_config = strainge_db_config,
-            predicted_taxonomy = gambit.gambit_predicted_taxon
+            predicted_taxonomy = gambit.gambit_predicted_taxon,
+            strainge_prepare_straingr = strainge_prepare_straingr
         }
       }
     } 
@@ -598,10 +600,10 @@ workflow gemstone_isolates {
     Boolean? straingst_found_db = strainge.straingst_found_db
     Array[File]? straingst_strains = strainge.straingst_strains
     Array[File]? straingst_statistics = strainge.straingst_statistics
-    Array[File]? straingr_concat_fasta = strainge.straingr_concat_fasta
-    Array[File]? straingr_read_alignment = strainge.straingr_read_alignment
-    Array[File]? straingr_variants = strainge.straingr_variants
-    Array[File]? straingr_report = strainge.straingr_report
+    Array[File?]? straingr_concat_fasta = strainge.straingr_concat_fasta
+    Array[File?]? straingr_read_alignment = strainge.straingr_read_alignment
+    Array[File?]? straingr_variants = strainge.straingr_variants
+    Array[File?]? straingr_report = strainge.straingr_report
     Array[String]? strainge_docker = strainge.strainge_docker
     Array[String]? strainge_version = strainge.strainge_version
   }
