@@ -84,12 +84,15 @@ task kraken2_standalone {
   command <<<
     echo $(kraken2 --version 2>&1) | sed 's/^.*Kraken version //;s/ .*$//' | tee KRAKEN_VERSION
     date | tee DATE
+    # Decompress the Kraken2 database
+    mkdir db
+    tar -C ./db/ -xzvf ~{kraken2_db}
 
     mode="--paired"
 
     # Run Kraken2
     kraken2 $mode \
-        --db ~{kraken2_db} \
+        --db ./db/ \
         --threads ~{cpu} \
         --report ~{samplename}.report.txt \
         --gzip-compressed \
@@ -118,7 +121,7 @@ task kraken2_standalone {
 
     # Run bracken
     bracken -v | cut -d ' ' -f2 > BRACKEN_VERSION
-    bracken -d ~{kraken2_db} -i ~{samplename}.report.txt -o ~{samplename}.bracken.txt \
+    bracken -d ./db/ -i ~{samplename}.report.txt -o ~{samplename}.bracken.txt \
       -r ~{bracken_read_len} -l ~{bracken_classification_level} -t ~{bracken_min_reads}
 
   >>>

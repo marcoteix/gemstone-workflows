@@ -13,7 +13,7 @@ workflow kraken2_pe_wf {
     String samplename
     File read1
     File read2
-    String kraken2_db = "gs://fc-secure-7751772e-8b9f-48be-9267-d7a815a23b02/databases/kraken_test"
+    File kraken2_db
     Int bracken_read_len = 150
     String bracken_classification_level = "G"
     Int bracken_min_reads = 10

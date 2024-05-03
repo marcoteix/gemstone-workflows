@@ -9,7 +9,7 @@ task version_capture {
     volatile: true
   }
   command {
-    WF_Version="v1.0.0 (PHB v1.2.1)"
+    WF_Version="v1.0.2 (PHB v1.2.1)"
     ~{default='' 'export TZ=' + timezone}
     date +"%Y-%m-%d" > TODAY
     echo "$WF_Version" > WF_VERSION
