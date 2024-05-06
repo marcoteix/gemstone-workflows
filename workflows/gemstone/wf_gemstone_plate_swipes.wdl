@@ -25,6 +25,7 @@ workflow gemstone_plate_swipes {
     String samplename
     File? reference
     String lab_determined_genus
+    Boolean qc_only = true
     Boolean output_additional_files = false
     # StrainGE options
     Boolean call_strainge = false
@@ -36,10 +37,10 @@ workflow gemstone_plate_swipes {
     Int strainge_db_kmer_size = 23
     Boolean strainge_prepare_straingr = false
     # Kraken options
-    Boolean call_kraken2 = false
+    Boolean call_kraken2 = true
     File kraken2_db
     Int bracken_read_len = 150
-    String bracken_classification_level = "G"
+    String bracken_classification_level = "S"
     Int kraken2_mem = 32
     Int kraken2_cpu = 4
     Int kraken2_disk_size = 256
@@ -75,122 +76,124 @@ workflow gemstone_plate_swipes {
         bracken_classification_level = bracken_classification_level
     }
   }
-  call metaspades_assembly_wf.metaspades_assembly_pe as metaspades {
-  input:
-    read1 = read_QC_trim.read1_clean,
-    read2 = read_QC_trim.read2_clean,
-    samplename = samplename
-  }
-  # if reference is provided, perform mapping of assembled contigs to 
-  # reference with minimap2, and extract those as final assembly
-  if (defined(reference)){
-    call minimap2_task.minimap2 as minimap2_assembly {
-      input:
-        query1 = metaspades.assembly_fasta,
-        reference = select_first([reference]),
-        samplename = samplename,
-        mode = "asm20",
-        output_sam = false
+  if (!qc_only) {
+    call metaspades_assembly_wf.metaspades_assembly_pe as metaspades {
+    input:
+      read1 = read_QC_trim.read1_clean,
+      read2 = read_QC_trim.read2_clean,
+      samplename = samplename
     }
-    call parse_mapping_task.retrieve_aligned_contig_paf {
+    # if reference is provided, perform mapping of assembled contigs to 
+    # reference with minimap2, and extract those as final assembly
+    if (defined(reference)){
+      call minimap2_task.minimap2 as minimap2_assembly {
+        input:
+          query1 = metaspades.assembly_fasta,
+          reference = select_first([reference]),
+          samplename = samplename,
+          mode = "asm20",
+          output_sam = false
+      }
+      call parse_mapping_task.retrieve_aligned_contig_paf {
+        input:
+          paf = minimap2_assembly.minimap2_out,
+          assembly = metaspades.assembly_fasta,
+          samplename = samplename
+      }
+      call parse_mapping_task.calculate_coverage_paf {
+        input:
+          paf = minimap2_assembly.minimap2_out
+      }
+    }
+    call quast_task.quast {
       input:
-        paf = minimap2_assembly.minimap2_out,
+        assembly = select_first([retrieve_aligned_contig_paf.final_assembly, metaspades.assembly_fasta]),
+        samplename = samplename,
+        min_contig_len = 1
+    }
+    if (output_additional_files){
+      call minimap2_task.minimap2 as minimap2_reads {
+        input:
+          query1 = read_QC_trim.read1_clean,
+          query2 = read_QC_trim.read2_clean, 
+          reference = select_first([retrieve_aligned_contig_paf.final_assembly, metaspades.assembly_fasta]),
+          samplename = samplename,
+          mode = "sr",
+          output_sam = true
+      }
+      call parse_mapping_task.sam_to_sorted_bam {
+        input:
+          sam = minimap2_reads.minimap2_out,
+          samplename = samplename
+      }
+      call parse_mapping_task.calculate_coverage {
+        input:
+          bam = sam_to_sorted_bam.bam,
+          bai = sam_to_sorted_bam.bai
+      }
+      call parse_mapping_task.retrieve_pe_reads_bam as retrieve_unaligned_pe_reads_sam {
+        input:
+          bam = sam_to_sorted_bam.bam,
+          samplename = samplename,
+          prefix = "unassembled",
+          sam_flag = 4
+      }
+      call parse_mapping_task.retrieve_pe_reads_bam as retrieve_aligned_pe_reads_sam {
+        input:
+          bam = sam_to_sorted_bam.bam,
+          samplename = samplename,
+          sam_flag = 2,
+          prefix = "assembled"
+      }
+      call parse_mapping_task.assembled_reads_percent {
+        input:
+          bam = sam_to_sorted_bam.bam,
+      } 
+    }  
+    call bakta_task.bakta {
+      input:
         assembly = metaspades.assembly_fasta,
         samplename = samplename
     }
-    call parse_mapping_task.calculate_coverage_paf {
+    call mob_suite_task.mob_recon {
       input:
-        paf = minimap2_assembly.minimap2_out
-    }
-  }
-  call quast_task.quast {
-    input:
-      assembly = select_first([retrieve_aligned_contig_paf.final_assembly, metaspades.assembly_fasta]),
-      samplename = samplename,
-      min_contig_len = 1
-  }
-  if (output_additional_files){
-    call minimap2_task.minimap2 as minimap2_reads {
-      input:
-        query1 = read_QC_trim.read1_clean,
-        query2 = read_QC_trim.read2_clean, 
-        reference = select_first([retrieve_aligned_contig_paf.final_assembly, metaspades.assembly_fasta]),
-        samplename = samplename,
-        mode = "sr",
-        output_sam = true
-    }
-    call parse_mapping_task.sam_to_sorted_bam {
-      input:
-        sam = minimap2_reads.minimap2_out,
+        assembly = metaspades.assembly_fasta,
         samplename = samplename
     }
-    call parse_mapping_task.calculate_coverage {
+    call amrfinderplus.amrfinderplus_nuc as amrfinderplus_task {
       input:
-        bam = sam_to_sorted_bam.bam,
-        bai = sam_to_sorted_bam.bai
+        assembly = metaspades.assembly_fasta,
+        samplename = samplename
     }
-    call parse_mapping_task.retrieve_pe_reads_bam as retrieve_unaligned_pe_reads_sam {
-      input:
-        bam = sam_to_sorted_bam.bam,
-        samplename = samplename,
-        prefix = "unassembled",
-        sam_flag = 4
+    if (call_strainge) {
+      call strainge_wf.strainge_pe_wf as strainge {
+        input:
+          samplename = samplename,
+          read1 = read_QC_trim.read1_clean,
+          read2 = read_QC_trim.read2_clean,
+          strainge_db_kmer_size = strainge_db_kmer_size,
+          strainge_disk_size = strainge_disk_size,
+          strainge_cpus = strainge_cpus,
+          strainge_memory = strainge_memory,
+          strainge_max_strains = strainge_max_strains,
+          strainge_db_config = strainge_db_config,
+          predicted_taxonomy = lab_determined_genus,
+          strainge_prepare_straingr = strainge_prepare_straingr
+      }
     }
-    call parse_mapping_task.retrieve_pe_reads_bam as retrieve_aligned_pe_reads_sam {
-      input:
-        bam = sam_to_sorted_bam.bam,
-        samplename = samplename,
-        sam_flag = 2,
-        prefix = "assembled"
-    }
-    call parse_mapping_task.assembled_reads_percent {
-      input:
-        bam = sam_to_sorted_bam.bam,
-    } 
-  }  
-  call bakta_task.bakta {
-    input:
-      assembly = metaspades.assembly_fasta,
-      samplename = samplename
-  }
-  call mob_suite_task.mob_recon {
-    input:
-      assembly = metaspades.assembly_fasta,
-      samplename = samplename
-  }
-  call amrfinderplus.amrfinderplus_nuc as amrfinderplus_task {
-    input:
-      assembly = metaspades.assembly_fasta,
-      samplename = samplename
-  }
-  if (call_strainge) {
-    call strainge_wf.strainge_pe_wf as strainge {
-      input:
-        samplename = samplename,
-        read1 = read_QC_trim.read1_clean,
-        read2 = read_QC_trim.read2_clean,
-        strainge_db_kmer_size = strainge_db_kmer_size,
-        strainge_disk_size = strainge_disk_size,
-        strainge_cpus = strainge_cpus,
-        strainge_memory = strainge_memory,
-        strainge_max_strains = strainge_max_strains,
-        strainge_db_config = strainge_db_config,
-        predicted_taxonomy = lab_determined_genus,
-        strainge_prepare_straingr = strainge_prepare_straingr
-    }
-  }
-  if (call_metawrap) {
-    call metawrap_task.metawrap_binning as metawrap {
-      input:
-        samplename = samplename,
-        assembly_fasta = metaspades.assembly_fasta,
-        read1 = read_QC_trim.read1_clean,
-        read2 = read_QC_trim.read2_clean,
-        metawrap_completion = metawrap_completion,
-        metawrap_contamination = metawrap_contamination,
-        metawrap_min_contig_length = metawrap_min_contig_length,
-        checkm_database = select_first([metawrap_checkm_db]),
-        binning_flags = binning_flags
+    if (call_metawrap) {
+      call metawrap_task.metawrap_binning as metawrap {
+        input:
+          samplename = samplename,
+          assembly_fasta = metaspades.assembly_fasta,
+          read1 = read_QC_trim.read1_clean,
+          read2 = read_QC_trim.read2_clean,
+          metawrap_completion = metawrap_completion,
+          metawrap_contamination = metawrap_contamination,
+          metawrap_min_contig_length = metawrap_min_contig_length,
+          checkm_database = select_first([metawrap_checkm_db]),
+          binning_flags = binning_flags
+      }
     }
   }
   call versioning.version_capture{
@@ -230,24 +233,24 @@ workflow gemstone_plate_swipes {
     # Read QC - Read stats
     Float? average_read_length = read_QC_trim.average_read_length
     # Assembly - metaspades 
-    File assembly_fasta = select_first([retrieve_aligned_contig_paf.final_assembly, metaspades.assembly_fasta])
-    String metaspades_version = metaspades.metaspades_version
-    String metaspades_docker = metaspades.metaspades_docker
+    File? assembly_fasta = select_first([retrieve_aligned_contig_paf.final_assembly, metaspades.assembly_fasta])
+    String? metaspades_version = metaspades.metaspades_version
+    String? metaspades_docker = metaspades.metaspades_docker
     # Assembly - minimap2
-    String minimap2_version = metaspades.minimap2_version
-    String minimap2_docker = metaspades.minimap2_docker
+    String? minimap2_version = metaspades.minimap2_version
+    String? minimap2_docker = metaspades.minimap2_docker
     # Assembly - samtools
-    String samtools_version = metaspades.samtools_version
-    String samtools_docker = metaspades.samtools_docker
+    String? samtools_version = metaspades.samtools_version
+    String? samtools_docker = metaspades.samtools_docker
     # Assembly - pilon
-    String pilon_version = metaspades.pilon_version
-    String pilon_docker = metaspades.pilon_docker
+    String? pilon_version = metaspades.pilon_version
+    String? pilon_docker = metaspades.pilon_docker
     # Assembly QC - quast
-    Int assembly_length = quast.genome_length
-    Int contig_number = quast.number_contigs
-    Int largest_contig = quast.largest_contig
-    String quast_version = quast.version
-    String quast_docker = quast.quast_docker
+    Int? assembly_length = quast.genome_length
+    Int? contig_number = quast.number_contigs
+    Int? largest_contig = quast.largest_contig
+    String? quast_version = quast.version
+    String? quast_docker = quast.quast_docker
     # Assembly QC - minimap2
     Float? percent_coverage = calculate_coverage_paf.percent_coverage
     # Assembly QC - bedtools
@@ -274,31 +277,31 @@ workflow gemstone_plate_swipes {
     Array[String]? strainge_docker = strainge.strainge_docker
     Array[String]? strainge_version = strainge.strainge_version
     # Bakta outputs
-    File bakta_gbff = bakta.bakta_gbff
-    File bakta_gff3 = bakta.bakta_gff3
-    File bakta_tsv = bakta.bakta_tsv
-    File bakta_summary = bakta.bakta_txt
-    String bakta_version = bakta.bakta_version
+    File? bakta_gbff = bakta.bakta_gbff
+    File? bakta_gff3 = bakta.bakta_gff3
+    File? bakta_tsv = bakta.bakta_tsv
+    File? bakta_summary = bakta.bakta_txt
+    String? bakta_version = bakta.bakta_version
     # MOB-recon Results
-    File mob_recon_results = mob_recon.mob_recon_results
-    File mob_typer_results = mob_recon.mob_typer_results
-    File mob_recon_chromosome_fasta = mob_recon.chromosome_fasta
-    Array[File] mob_recon_plasmid_fastas = mob_recon.plasmid_fastas
-    String mob_recon_docker = mob_recon.mob_recon_docker
-    String mob_recon_version = mob_recon.mob_recon_version
+    File? mob_recon_results = mob_recon.mob_recon_results
+    File? mob_typer_results = mob_recon.mob_typer_results
+    File? mob_recon_chromosome_fasta = mob_recon.chromosome_fasta
+    Array[File]? mob_recon_plasmid_fastas = mob_recon.plasmid_fastas
+    String? mob_recon_docker = mob_recon.mob_recon_docker
+    String? mob_recon_version = mob_recon.mob_recon_version
     # NCBI-AMRFinderPlus Outputs
-    File amrfinderplus_all_report = amrfinderplus_task.amrfinderplus_all_report
-    File amrfinderplus_amr_report = amrfinderplus_task.amrfinderplus_amr_report
-    File amrfinderplus_stress_report = amrfinderplus_task.amrfinderplus_stress_report
-    File amrfinderplus_virulence_report = amrfinderplus_task.amrfinderplus_virulence_report
-    String amrfinderplus_amr_core_genes = amrfinderplus_task.amrfinderplus_amr_core_genes
-    String amrfinderplus_amr_plus_genes = amrfinderplus_task.amrfinderplus_amr_plus_genes
-    String amrfinderplus_stress_genes = amrfinderplus_task.amrfinderplus_stress_genes
-    String amrfinderplus_virulence_genes = amrfinderplus_task.amrfinderplus_virulence_genes
-    String amrfinderplus_amr_classes = amrfinderplus_task.amrfinderplus_amr_classes
-    String amrfinderplus_amr_subclasses = amrfinderplus_task.amrfinderplus_amr_subclasses
-    String amrfinderplus_version = amrfinderplus_task.amrfinderplus_version
-    String amrfinderplus_db_version = amrfinderplus_task.amrfinderplus_db_version
+    File? amrfinderplus_all_report = amrfinderplus_task.amrfinderplus_all_report
+    File? amrfinderplus_amr_report = amrfinderplus_task.amrfinderplus_amr_report
+    File? amrfinderplus_stress_report = amrfinderplus_task.amrfinderplus_stress_report
+    File? amrfinderplus_virulence_report = amrfinderplus_task.amrfinderplus_virulence_report
+    String? amrfinderplus_amr_core_genes = amrfinderplus_task.amrfinderplus_amr_core_genes
+    String? amrfinderplus_amr_plus_genes = amrfinderplus_task.amrfinderplus_amr_plus_genes
+    String? amrfinderplus_stress_genes = amrfinderplus_task.amrfinderplus_stress_genes
+    String? amrfinderplus_virulence_genes = amrfinderplus_task.amrfinderplus_virulence_genes
+    String? amrfinderplus_amr_classes = amrfinderplus_task.amrfinderplus_amr_classes
+    String? amrfinderplus_amr_subclasses = amrfinderplus_task.amrfinderplus_amr_subclasses
+    String? amrfinderplus_version = amrfinderplus_task.amrfinderplus_version
+    String? amrfinderplus_db_version = amrfinderplus_task.amrfinderplus_db_version
     # MetaWRAP outputs
     String? metawrap_docker = metawrap.metawrap_docker
     String? metawrap_version = metawrap.metawrap_version
