@@ -109,7 +109,7 @@ task select_reference_db_lite {
   EOF
   >>>
   output {
-    Array[File] selected_db = read_lines("~{samplename}/DATABASE")
+    Array[String] selected_db = read_lines("~{samplename}/DATABASE")
     Boolean found_db = read_boolean("~{samplename}/MATCH")
   }
   runtime {
