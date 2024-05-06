@@ -199,6 +199,11 @@ workflow gemstone_plate_swipes {
   call versioning.version_capture{
     input:
   }
+  # Does the same as select_first, but does not throw an error if all are null
+  Array[File] all_assembly = select_all([retrieve_aligned_contig_paf.final_assembly, metaspades.assembly_fasta])
+  if (length(all_assembly) > 0) {
+    File non_null_assembly_fasta = all_assembly[0]
+  }
   output {
     # Version capture
     String gemstone_wf_version = version_capture.wf_version
@@ -233,7 +238,7 @@ workflow gemstone_plate_swipes {
     # Read QC - Read stats
     Float? average_read_length = read_QC_trim.average_read_length
     # Assembly - metaspades 
-    File? assembly_fasta = select_first([retrieve_aligned_contig_paf.final_assembly, metaspades.assembly_fasta])
+    File? assembly_fasta = non_null_assembly_fasta
     String? metaspades_version = metaspades.metaspades_version
     String? metaspades_docker = metaspades.metaspades_docker
     # Assembly - minimap2
