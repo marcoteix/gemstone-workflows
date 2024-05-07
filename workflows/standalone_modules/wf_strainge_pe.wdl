@@ -53,7 +53,7 @@ workflow strainge_pe_wf {
     String strainge_pe_wf_version = version_capture.wf_version
     String strainge_pe_wf_analysis_date = version_capture.date
     Array[File]? straingst_kmerized_reads = strainge_isolate.straingst_kmerized_reads
-    Array[File] straingst_selected_db = select_reference_db.selected_db
+    Array[String] straingst_selected_db = select_reference_db.selected_db
     Boolean straingst_found_db = select_reference_db.found_db
     Array[File]? straingst_strains = strainge_isolate.straingst_strains
     Array[File]? straingst_statistics = strainge_isolate.straingst_statistics

@@ -38,7 +38,7 @@ task strainge {
   >>>
   output {
     File straingst_kmerized_reads = "~{samplename}_kmerized_reads.hdf5"
-    File straingst_reference_db_used = "~{strainge_db}"
+    String straingst_reference_db_used = "~{strainge_db}"
     File straingst_strains = "~{samplename}_straingst_results.strains.tsv"
     File straingst_statistics = "~{samplename}_straingst_results.stats.tsv"
     File? straingr_concat_fasta = "~{samplename}_refs_concat.fasta"
