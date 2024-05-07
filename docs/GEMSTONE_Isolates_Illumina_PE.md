@@ -548,7 +548,7 @@ This workflow was based on the [PHB v1.0.0 TheiaProk workflow](https://theiagen.
 `Array[File]` `Optional` Files with k-merized input reads. The size of the array depends on how many genera are assigned in `lab_determined_genus`, but the contents of each file should be the same. Returned only if `call_strainge` and `straingst_found_db` are `true`.
 
 #### straingst_selected_db
-`Array[File]` `Optional` StrainGST databases used in each call to StrainGE. The size of the array depends on how many genera are assigned in `lab_determined_genus`. Returned only if `call_strainge` and `straingst_found_db` are `true`.
+`Array[String]` `Optional` StrainGST databases used in each call to StrainGE. The size of the array depends on how many genera are assigned in `lab_determined_genus`. Returned only if `call_strainge` and `straingst_found_db` are `true`.
 
 #### straingst_found_db
 `Boolean` `Optional` Whether a StrainGST database matching the genera in `lab_determined_genus` was found. Returned only if `call_strainge` is `true`.

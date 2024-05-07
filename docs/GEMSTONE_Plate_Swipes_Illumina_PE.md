@@ -18,6 +18,10 @@ This workflow was based on the [PHB v1.0.0 TheiaMeta workflow](https://theiagen.
 <details open>
 <summary>Click to open or hide</summary>
 
+#### qc_only
+`Boolean` `Optionl` `Default = true` If `true`, performs QC and estimates taxa abundances with Kraken2/Braken.
+If `false`, runs all other tasks in the pipeline, depending on the `call_strainge`, `call_kraken`, and `call_metawrap` options. Set to `false` to assemble genomes.
+
 #### output_aditional_files
 `Boolean` `Optional` `Default = false` If `true`, aligns reads to the assembly, computes coverage, and retrieves aligned and unaligned reads.
 
@@ -351,7 +355,7 @@ FASTQ file of reverse reads with human reads removed.
 `Array[File]` `Optional` Files with k-merized input reads. The size of the array depends on how many genera are assigned in `lab_determined_genus`, but the contents of each file should be the same. Returned only if `call_strainge` and `straingst_found_db` are `true`.
 
 #### straingst_selected_db
-`Array[File]` `Optional` StrainGST databases used in each call to StrainGE. The size of the array depends on how many genera are assigned in `lab_determined_genus`. Returned only if `call_strainge` and `straingst_found_db` are `true`.
+`Array[String]` `Optional` StrainGST databases used in each call to StrainGE. The size of the array depends on how many genera are assigned in `lab_determined_genus`. Returned only if `call_strainge` and `straingst_found_db` are `true`.
 
 #### straingst_found_db
 `Boolean` `Optional` Whether a StrainGST database matching the genera in `lab_determined_genus` was found. Returned only if `call_strainge` is `true`.
