@@ -55,7 +55,7 @@ task ncbi_scrub_pe {
   }
   runtime {
       docker: "~{docker}"
-      memory: "8 GB"
+      memory: mem + " GB"
       cpu: 4
       disks:  "local-disk " + disk_size + " SSD"
       disk: disk_size + " GB" # TES
@@ -98,7 +98,7 @@ task ncbi_scrub_se {
   }
   runtime {
     docker: "~{docker}"
-    memory: mem + " GB"
+    memory: "32 GB"
     cpu: 4
     disks:  "local-disk " + disk_size + " SSD"
     disk: disk_size + " GB" # TES
