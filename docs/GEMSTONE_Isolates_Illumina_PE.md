@@ -1,6 +1,6 @@
 # GEMSTONE_Isolates_Illumina_PE
 
-<span style="font-size:200%; color:grey"> `v1.0.0` </span>
+<span style="font-size:200%; color:grey"> `v1.0.3` </span>
 
 This workflow processes paired-end Illumina reads from bacterial isolates. It performs QA and QC, flagging low quality and contaminated samples. Samples for which reads fail QC are not subject to further analysis. Performs *de novo* assembly with SPAdes and refines it with Pilon. Finds AMR, virulence, and stress genes with AMRFinderPlus, identifies and types plasmid contigs with MOB-recon, types sequences with TS-MLST, annotates them with Bakta, and infers taxonomy with GAMBIT. Also performs taxa-specific analysis - please refer to [TheiaProk documentation](https://theiagen.notion.site/TheiaProk-Workflow-Series-1296f3df6a7c41c7937053a03f664a5a) for those tasks. Optionally, it estimates taxa abundances with Kraken2 and Bracken and does strain-level identification with StrainGE (based on the GAMBIT predicted taxon).
 

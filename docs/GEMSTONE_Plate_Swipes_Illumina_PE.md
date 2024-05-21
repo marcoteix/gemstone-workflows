@@ -1,6 +1,6 @@
 # GEMSTONE_Plate_Swipes_Illumina_PE
 
-<span style="font-size:200%; color:grey"> `v1.0.0` </span>
+<span style="font-size:200%; color:grey"> `v1.0.3` </span>
 
 This workflow processes paired-end Illumina reads from plate swipes/plate bacterial metagenomes. It could also be used for broader bacterial metagenomic analysis. It removes human reads, performs QA and QC, and metagenomic assembly. Furthermore, it estimates taxa abundances with Kraken2 and Bracken, does strain-level identification with StrainGE, bins MAGs, performs AMR genotyping, and identifies plasmid contigs.
 
