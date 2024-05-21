@@ -30,29 +30,17 @@ workflow read_QC_trim_pe {
     String read_processing = "trimmomatic"
     String? trimmomatic_args
     String fastp_args = "--detect_adapter_for_pe -g -5 20 -3 20"
+    Int ncbi_scrub_disk_size = 100
+    Int ncbi_scrub_mem = 32
   }
   if (("~{workflow_series}" == "theiacov") || ("~{workflow_series}" == "theiameta")) {
     call ncbi_scrub.ncbi_scrub_pe {
       input:
         samplename = samplename,
         read1 = read1_raw,
-        read2 = read2_raw
-    }
-  }
-  if ("~{workflow_series}" == "theiacov") {
-    call kraken.kraken2_theiacov as kraken2_theiacov_raw {
-      input:
-        samplename = samplename,
-        read1 = read1_raw,
         read2 = read2_raw,
-        target_org = target_org
-    }
-    call kraken.kraken2_theiacov as kraken2_theiacov_dehosted {
-      input:
-        samplename = samplename,
-        read1 = select_first([ncbi_scrub_pe.read1_dehosted]),
-        read2 = ncbi_scrub_pe.read2_dehosted,
-        target_org = target_org
+        disk_size = ncbi_scrub_disk_size,
+        mem = ncbi_scrub_mem
     }
   }
   if (read_processing == "trimmomatic"){

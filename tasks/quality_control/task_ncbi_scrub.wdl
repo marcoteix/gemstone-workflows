@@ -7,6 +7,7 @@ task ncbi_scrub_pe {
     String samplename
     String docker = "us-docker.pkg.dev/general-theiagen/ncbi/sra-human-scrubber:1.0.2021-05-05"
     Int disk_size = 100
+    Int mem = 32
   }
   String r1_filename = basename(read1)
   String r2_filename = basename(read2)
@@ -97,7 +98,7 @@ task ncbi_scrub_se {
   }
   runtime {
     docker: "~{docker}"
-    memory: "8 GB"
+    memory: mem + " GB"
     cpu: 4
     disks:  "local-disk " + disk_size + " SSD"
     disk: disk_size + " GB" # TES

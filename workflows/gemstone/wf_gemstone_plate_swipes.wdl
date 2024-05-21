@@ -51,13 +51,18 @@ workflow gemstone_plate_swipes {
     Int metawrap_contamination = 10
     Int metawrap_min_contig_length = 1000
     String binning_flags = "--metabat2 --maxbin2 --concoct"
+    # Mem and disk
+    Int ncbi_scrub_disk_size = 100
+    Int ncbi_scrub_mem = 32
   }
   call read_qc_wf.read_QC_trim_pe as read_QC_trim {
     input:
       samplename = samplename,
       read1_raw = read1,
       read2_raw = read2,
-      workflow_series = "theiameta"
+      workflow_series = "theiameta",
+      ncbi_scrub_disk_size = ncbi_scrub_disk_size,
+      ncbi_scrub_mem = ncbi_scrub_mem
   }
   if (call_kraken2) {
     call kraken_task.kraken2_standalone as kraken2_clean {
