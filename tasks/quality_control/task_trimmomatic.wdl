@@ -13,6 +13,7 @@ task trimmomatic_pe {
     String? trimmomatic_args
     Int disk_size = 100
   }
+  Int mem = (ceil(size(read1,"GiB"))+ceil(size(read2,"GiB"))) + 6
   command <<<
     # date and version control
     date | tee DATE
@@ -37,7 +38,7 @@ task trimmomatic_pe {
   }
   runtime {
     docker: "~{docker}"
-    memory: "8 GB"
+    memory: mem + " GB"
     cpu: 4
     disks:  "local-disk " + disk_size + " SSD"
     disk: disk_size + " GB" # TES

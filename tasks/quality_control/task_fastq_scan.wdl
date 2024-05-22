@@ -9,6 +9,7 @@ task fastq_scan_pe {
     Int disk_size = 100
     String docker = "quay.io/biocontainers/fastq-scan:0.4.4--h7d875b9_1"
   }
+  Int mem = (ceil(size(read1,"GiB"))+ceil(size(read2,"GiB"))) + 2
   command <<<
     # capture date and version
     date | tee DATE
@@ -50,7 +51,7 @@ task fastq_scan_pe {
   }
   runtime {
     docker: "us-docker.pkg.dev/general-theiagen/biocontainers/fastq-scan:0.4.4--h7d875b9_1"
-    memory: "2 GB"
+    memory: mem + " GB"
     cpu: 2
     disks:  "local-disk " + disk_size + " SSD"
     disk: disk_size + " GB" # TES
