@@ -20,7 +20,7 @@ workflow read_QC_trim_pe {
     Int trim_minlen = 75
     Int trim_quality_trim_score = 30
     Int trim_window_size = 4
-    Int bbduk_mem = 8
+    Int bbduk_mem = 16
     Boolean call_midas = false
     File? midas_db
     String? target_org

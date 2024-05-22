@@ -4,7 +4,7 @@ task readlength {
   input {
     File read1
     File read2
-    Int memory = 8
+    Int memory = 16
     String docker = "us-docker.pkg.dev/general-theiagen/staphb/bbtools:38.76"
     Int disk_size = 100
   }

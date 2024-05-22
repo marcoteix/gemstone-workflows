@@ -14,6 +14,7 @@ task fastp_pe {
     String fastp_args = "--detect_adapter_for_pe -g -5 20 -3 20"
     Int threads = 4
   }
+  Int mem = (ceil(size(read1,"GiB"))+ceil(size(read2,"GiB")))+ 8
   command <<<
     # date 
     date | tee DATE
@@ -39,7 +40,7 @@ task fastp_pe {
   }
   runtime {
     docker: "us-docker.pkg.dev/general-theiagen/staphb/fastp:0.23.2"
-    memory: "8 GB"
+    memory: mem + " GB"
     cpu: 4
     disks: "local-disk " + disk_size + " SSD"
     disk: disk_size + " GB"
