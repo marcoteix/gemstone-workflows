@@ -2,7 +2,7 @@ version 1.0
 
 import "../../../tasks/taxon_id/task_strainge.wdl" as strainge_task
 
-workflow test_top_strain {
+workflow top_strain {
     meta {
         description: "Takes an array of StrainGST output TSV files and finds the strain with highest relative abundance."
     }

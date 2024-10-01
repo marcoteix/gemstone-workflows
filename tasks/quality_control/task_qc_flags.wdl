@@ -17,24 +17,23 @@ task qc_flags_row {
   }
   command <<<
 
-    cd /scripts/qc/bin
-    python row.py \
-      -rs ~{raw_read_screen} \
-      -cs ~{clean_read_screen} \
+    python /scripts/bin/row.py \
+      -rs "~{raw_read_screen}" \
+      -cs "~{clean_read_screen}" \
       -x ~{est_coverage_clean} \
-      -ls ~{species} \
-      -g ~{gambit_predicted_taxon} \
+      -ls "~{species}" \
+      -g "~{gambit_predicted_taxon}" \
       -c ~{checkm2_contamination} \
       -C ~{checkm2_completeness} \
       -mx ~{min_coverage} \
       -Mc ~{max_contamination} \
       -mc ~{min_completeness} \
-      -o "~/qc_results"
+      -o "home/qc"
 
   >>>
   output {
-    String qc_check = read_string("~/qc_results/qc_check")
-    String qc_note = read_string("~/qc_results/qc_note")
+    String qc_check = read_string("home/qc/qc_check")
+    String qc_note = read_string("home/qc/qc_note")
   }
   runtime {
     docker: "~{docker}"
@@ -42,7 +41,7 @@ task qc_flags_row {
     cpu: 1
     disks: "local-disk " + disk_size + " SSD"
     disk: disk_size + " GB"
-    maxRetries: 3
+    maxRetries: 0
     preemptible: 0
   }
 }
@@ -52,14 +51,14 @@ task qc_flags_table {
     String table
     String workspace
     Float min_coverage = 40.0
-    Float max_contamination = 2.0
+    Float max_contamination = 5.0
     Float min_completeness = 80.0
     String docker = "marcoteix/gemstone-qc:1.0.0"
     Int disk_size = 10
   }
   command <<<
 
-    cd /scripts/qc/bin
+    cd /scripts/bin
     python table.py \
       -t ~{table} \
       -w ~{workspace} \
@@ -76,7 +75,7 @@ task qc_flags_table {
     cpu: 1
     disks: "local-disk " + disk_size + " SSD"
     disk: disk_size + " GB"
-    maxRetries: 3
+    maxRetries: 0
     preemptible: 0
   }
 }

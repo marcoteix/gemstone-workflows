@@ -18,6 +18,7 @@ import "../../tasks/taxon_id/task_kraken2.wdl" as kraken2
 import "../../tasks/quality_control/task_checkm2.wdl" as checkm2_task
 import "../../tasks/quality_control/task_taxonomy_qc.wdl" as taxonomy_qc_task
 import "../standalone_modules/wf_strainge_pe.wdl" as strainge_wf
+import "../../../tasks/quality_control/task_qc_flags.wdl" as task_qc_flags
 
 workflow gemstone_isolates {
   meta {
@@ -58,6 +59,7 @@ workflow gemstone_isolates {
     Int kraken2_disk_size = 256
     # CheckM2 QC options
     Float contamination_threshold = 2
+    Float min_completeness = 80.0
     # StrainGE options
     Boolean call_strainge = false
     Boolean strainge_prepare_straingr = false
@@ -253,11 +255,18 @@ workflow gemstone_isolates {
         }
       }
     } 
-    call qc_check_task.qc_flags_check {
+    call task_qc_flags.qc_flags_row as qc {
       input:
-        qc_taxonomy_flag = taxonomy_qc_check.qc_check,
-        qc_check_table_flag = qc_check_phb.qc_check,
-        qc_clean_reads_flag = clean_check_reads.read_screen
+        raw_read_screen = raw_check_reads.read_screen,
+        clean_read_screen = clean_check_reads.read_screen,
+        est_coverage_clean = cg_pipeline_clean.est_coverage,
+        species = lab_determined_genus,
+        gambit_predicted_taxon = gambit.gambit_predicted_taxon,
+        checkm2_completeness = checkm2.completeness,
+        checkm2_contamination = checkm2.contamination,
+        min_coverage = min_coverage,
+        max_contamination = contamination_threshold,
+        min_completeness = min_completeness
     }
   }
   output {
@@ -367,8 +376,8 @@ workflow gemstone_isolates {
     # QC_Check Results
     String? read_and_table_qc_check = qc_check_phb.qc_check
     File? read_and_table_qc_standard = qc_check_phb.qc_standard
-    String? qc_check = qc_flags_check.qc_check
-    String? qc_note = qc_flags_check.qc_note
+    String? qc_check = qc.qc_check
+    String? qc_note = qc.qc_note
     # Ecoli Typing
     File? serotypefinder_report = merlin_magic.serotypefinder_report
     String? serotypefinder_docker = merlin_magic.serotypefinder_docker
