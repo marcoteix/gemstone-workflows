@@ -15,3 +15,15 @@ workflows:
  - name: MetaWRAP_PE
    subclass: WDL
    primaryDescriptorPath: /workflows/standalone_modules/wf_metawrap.wdl
+ - name: GEMSTONE_QC_flags_table
+   subclass: WDL
+   primaryDescriptorPath: /workflows/utilities/wf_qc_flags_table.wdl
+ - name: GEMSTONE_QC_flags_row
+   subclass: WDL
+   primaryDescriptorPath: /workflows/standalone_modules/wf_qc.wdl
+ - name: StrainGST_top_strain
+   subclass: WDL
+   primaryDescriptorPath: /workflows/utilities/wf_top_strain.wdl
+ - name: GEMSTONE_status
+   subclass: WDL
+   primaryDescriptorPath: /workflows/utilities/wf_status.wdl

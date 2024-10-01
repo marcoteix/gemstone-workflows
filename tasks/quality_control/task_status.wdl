@@ -1,6 +1,6 @@
 version 1.0
 
-task qc_flags_table {
+task status {
   input {
     String table
     String workspace
@@ -9,8 +9,7 @@ task qc_flags_table {
   }
   command <<<
 
-    cd /scripts/qc/bin
-    python status.py \
+    python /scripts/bin/status.py \
       -t ~{table} \
       -w ~{workspace}
 
