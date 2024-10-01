@@ -1,6 +1,6 @@
 version 1.0
 
-import "../../../tasks/quality_control/task_qc_flags.wdl" as task_qc_flags
+import "../../tasks/quality_control/task_qc_flags.wdl" as task_qc_flags
 
 workflow test_row_qc {
     meta {

@@ -1,6 +1,6 @@
 version 1.0
 
-import "../../../tasks/taxon_id/task_strainge.wdl" as strainge_task
+import "../../tasks/taxon_id/task_strainge.wdl" as strainge_task
 
 workflow top_strain {
     meta {
@@ -8,7 +8,7 @@ workflow top_strain {
     }
     input {
         Array[File] straingst_strains
-        Float min_coverage = .8
+        Float min_coverage = 0.8
     }
     call strainge_task.top_strain {
         input:

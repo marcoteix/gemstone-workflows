@@ -1,6 +1,6 @@
 version 1.0
 
-import "../../../tasks/quality_control/task_status.wdl" as task_status
+import "../../tasks/quality_control/task_status.wdl" as task_status
 
 workflow status {
     meta {
