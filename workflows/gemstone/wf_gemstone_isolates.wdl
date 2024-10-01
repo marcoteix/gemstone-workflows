@@ -606,5 +606,6 @@ workflow gemstone_isolates {
     Array[File?]? straingr_report = strainge.straingr_report
     Array[String]? strainge_docker = strainge.strainge_docker
     Array[String]? strainge_version = strainge.strainge_version
+    String? straingst_top_strain = strainge.straingst_top_strain
   }
 }

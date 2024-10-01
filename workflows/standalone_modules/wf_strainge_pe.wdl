@@ -22,6 +22,7 @@ workflow strainge_pe_wf {
     Int strainge_memory = 128
     Int strainge_max_strains = 5
     Boolean strainge_prepare_straingr = false
+    Float min_coverage = .8
   }
   call select_db.select_reference_db_lite as select_reference_db {
     input:
@@ -45,6 +46,11 @@ workflow strainge_pe_wf {
             prepare_straingr = strainge_prepare_straingr
       }
     }
+    call strainge.top_strain {
+      input:
+        straingst_strains = strainge_isolate.straingst_strains,
+        min_coverage = min_coverage
+    }
   }
   call versioning.version_capture{
     input:
@@ -63,5 +69,6 @@ workflow strainge_pe_wf {
     Array[File?]? straingr_report = strainge_isolate.straingr_report
     Array[String]? strainge_docker = strainge_isolate.strainge_docker
     Array[String]? strainge_version = strainge_isolate.strainge_version
+    String? straingst_top_strain = top_strain.straingst_top_strain
   }
 }
