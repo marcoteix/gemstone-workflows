@@ -1,16 +1,9 @@
 #%%
-from pathlib import Path
-from warnings import warn
 from terra import get_entity, upload_entity
 import pandas as pd
+import cli 
 
-class Args:
-
-    def __init__(self) -> None:
-        self.table = "sample"
-        self.workspace = "test"
-
-args = Args()
+args = cli.CLI().status()
 
 # Load table
 X = get_entity(args.table, args.workspace)
@@ -24,7 +17,8 @@ preferred = X[
 ].groupby(["stock_id", "straingst_top_strain"]).n50_value.idxmax() \
     .rename("preferred_sample_id")
 
-X = X.join(preferred, on=["stock_id", "straingst_top_strain"])
+X = X.drop(columns="preferred_sample_id", errors="ignore") \
+    .join(preferred, on=["stock_id", "straingst_top_strain"])
 
 # If a sample fails either raw or clean read QC, set status to fail or resequence
 fail_yield = ~(X.raw_read_screen.eq("PASS") & X.clean_read_screen.eq("PASS"))
@@ -39,9 +33,16 @@ X.loc[fail_contam & ~X.preferred_sample_id.isna(), "status"] = "fail"
 
 # If it passes all QC flags and it is not the preferred sample, set status to 
 # duplicate
-X.loc[~fail_yield & ~fail_yield & ~X.preferred_sample_id.eq(X.index, fill_value="-"), 
-    "status"] = "duplicate"
+X.loc[~fail_yield & ~fail_contam & ~X.preferred_sample_id.eq(
+    X.index.to_series(), fill_value="-"), "status"] = "duplicate"
 X.loc[preferred.values, "status"] = "preferred"
+
+# Ignore non-processed samples
+X = X[~X.analysis_date.isna()]
+
+# Processed samples 
 #%% [DANGER ZONE] Upload QC rows back to the data table
 upload_entity(X[["status", "preferred_sample_id"]], args.table, args.workspace)
 
+
+# %%

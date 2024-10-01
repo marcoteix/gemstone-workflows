@@ -29,6 +29,16 @@ output back into the input data table in the columns qc_check, qc_note, and qc_t
         self.__qc_args()
 
         return self.parser.parse_args()
+    
+    def status(self) -> argparse.Namespace:
+        
+        self.__parser(
+            name="Status",
+            description="Takes an entity data table as input, generates status flags, and writes the \
+output back into the input data table in the columns status and preferred_sample_id."
+        )
+        self.__table_args()
+        return self.parser.parse_args()
 
     def __parser(self, name: str, description: str, **kwargs):
         self.parser = argparse.ArgumentParser(name, description=description, **kwargs)

@@ -111,7 +111,7 @@ def get_filesize(bucket: storage.Bucket, prefix: str = "") -> dict:
     return {blob.name: blob.size for blob in bucket.list_blobs(prefix=prefix)}
 
 def upload_entity(data: pd.DataFrame, name: str, project: str = "DSSC", 
-    chunksize: Union[None, int] = None):
+    chunksize: Union[None, int] = None, verbose: bool = False):
 
     if chunksize is None: chunksize = len(data)
     chunksize = np.minimum(chunksize, len(data))
@@ -121,13 +121,17 @@ def upload_entity(data: pd.DataFrame, name: str, project: str = "DSSC",
     data.index.name = f"entity:{name}_id"
     # Split data into chunks and upload
     i = chunksize
-    while i <= len(data): 
+    while (i - chunksize) < len(data): 
         rc = fapi.upload_entities_tsv(
             config["project"], config["workspace"], 
-            io.StringIO(_clean_entity_tsv(data.iloc[(i-chunksize):i].to_csv(sep='\t'))), 
-            model = "flexible")
-        if not rc.status_code == 200:
+            io.StringIO(_clean_entity_tsv(data.iloc[(i-chunksize):np.minimum(i, len(data))] \
+                .to_csv(sep='\t'))), model = "flexible")
+        if verbose:
+            print(f"Response (chunk {i//chunksize}): {rc.status_code} - {rc.reason}")
+        elif not rc.status_code == 200:
             warnings.warn(f"Got response code {rc.status_code} when uploading chunk {i//chunksize}.")
+        
+        i += chunksize
 
 def get_filenames(prefix: str = "", project: str = "DSSC") -> List[str]:
 
