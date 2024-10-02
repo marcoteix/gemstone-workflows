@@ -22,7 +22,7 @@ workflow strainge_pe_wf {
     Int strainge_memory = 128
     Int strainge_max_strains = 5
     Boolean strainge_prepare_straingr = false
-    Float min_coverage = .8
+    Float min_coverage = 0.8
   }
   call select_db.select_reference_db_lite as select_reference_db {
     input:
