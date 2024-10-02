@@ -40,7 +40,15 @@ X.loc[preferred.values, "status"] = "preferred"
 # Ignore non-processed samples
 X = X[~X.analysis_date.isna()]
 
-# Processed samples 
+# For samples without StrainGST results, if they are marked as resequence, 
+# check if there is any other sample with the same stock ID marked as preferred. If so,
+# set the sample to fail and update the preferred_sample_id
+preferred_rows = X[X.status.eq("preferred")]
+reseq = X.status.eq("resequence")
+to_update = reseq & X.stock_id.isin(preferred_rows.stock_id)
+X.loc[to_update, "status"] = "fail"
+X.loc[to_update, "preferred_sample_id"] = X.loc[to_update, "stock_id"] \
+    .apply(lambda x: preferred_rows[preferred_rows.stock_id.eq(x)].iloc[0].name)
 #%% [DANGER ZONE] Upload QC rows back to the data table
 upload_entity(X[["status", "preferred_sample_id"]], args.table, args.workspace)
 
