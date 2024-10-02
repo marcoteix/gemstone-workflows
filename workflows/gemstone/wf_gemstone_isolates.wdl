@@ -18,7 +18,7 @@ import "../../tasks/taxon_id/task_kraken2.wdl" as kraken2
 import "../../tasks/quality_control/task_checkm2.wdl" as checkm2_task
 import "../../tasks/quality_control/task_taxonomy_qc.wdl" as taxonomy_qc_task
 import "../standalone_modules/wf_strainge_pe.wdl" as strainge_wf
-import "../../../tasks/quality_control/task_qc_flags.wdl" as task_qc_flags
+import "../../tasks/quality_control/task_qc_flags.wdl" as task_qc_flags
 
 workflow gemstone_isolates {
   meta {
