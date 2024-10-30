@@ -45,6 +45,9 @@ gambit = X.gambit_predicted_taxon.apply(lambda x: x.split(" ")[0]
 qc.loc[~genera.isin(["unknown", "Candida"]) & gambit.ne(genera, fill_value="nan") 
     & qc.qc_check.eq("PASS"), qc_colnames] = ["ALERT", "Taxonomic mismatch", "QC_ALERT"]
 
+# Samples that pass QC should not have a QC note
+qc.loc[qc.qc_check.eq("PASS"), "qc_note"] = pd.NA
+
 # [DANGER ZONE] Upload QC rows back to the data table
 upload_entity(qc, args.table, args.workspace)
 # %%
