@@ -25,7 +25,7 @@ workflow straingr_prepare {
             genus = genus,
             strainge_db_config = strainge_db_config,
             straingst_selected_db = straingst_selected_db,
-            straingst_strains = straingst_strains
+            straingst_strains_tsvs = straingst_strains
     }
     call straingr_prepare_task.straingr_prepare {
         input:

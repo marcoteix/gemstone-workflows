@@ -6,7 +6,7 @@ task select_straingr_inputs {
     String genus
     File strainge_db_config  # TSV containing database names and paths
     String straingst_selected_db
-    String straingst_strains
+    String straingst_strains_tsvs
     Int disk_size = 4
   }
   command <<<
