@@ -31,17 +31,20 @@ task select_straingr_inputs {
           matched = True
           break
   
-  if not matched: print(f"Failed to find a matching database for ~{genus}.")
+  if not matched: 
+    msg = "Failed to find a matching database for ~{genus}."
+    print(msg)
+    with open("DATABASE", "a") as out_f: out_f.write(msg+"\n")
   # Check if there was a match
   with open("MATCH", "w") as f: f.write(str(matched).lower())
 
   # Select the StrainGST report file matching the desired genus
   if matched:
     found_report = False
-    straingst_dbs = [x.removepreffix("[").removesuffix("]") 
-      for x in "~{straingst_selected_db}".split(" ")]
-    strains_tsvs = [x.removepreffix("[").removesuffix("]") 
-      for x in "~{straingst_strains}".split(" ")]
+    straingst_dbs = [x.removeprefix("[").removesuffix("]").replace("\"", "").replace("\'", "").replace(" ","")
+      for x in "~{straingst_selected_db}".split(",")]
+    strains_tsvs = [x.removeprefix("[").removesuffix("]").replace("\"", "").replace("\'", "").replace(" ","")
+      for x in "~{straingst_strains_tsvs}".split(",")]
     for a, b in zip(straingst_dbs, strains_tsvs):
       print(a, b)
       if a == db: 
