@@ -10,6 +10,8 @@ X = get_entity(args.table, args.workspace)
 
 #%% Find the preferred sample (passed all QC and has the highest N50) for each stock
 # and strain
+X.loc[:, "straingst_top_strain"] = X.straingst_top_strain.fillna("unknown")
+
 preferred = X[
     X.raw_read_screen.eq("PASS", fill_value="-") &
     X.clean_read_screen.eq("PASS", fill_value="-") &

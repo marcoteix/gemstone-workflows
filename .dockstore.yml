@@ -27,3 +27,6 @@ workflows:
  - name: GEMSTONE_status
    subclass: WDL
    primaryDescriptorPath: /workflows/utilities/wf_status.wdl
+ - name: GEMSTONE_StrainGR
+   subclass: WDL
+   primaryDescriptorPath: /workflows/gemstone/wf_gemstone_straingr.wdl
