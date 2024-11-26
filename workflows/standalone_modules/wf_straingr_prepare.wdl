@@ -11,8 +11,8 @@ workflow straingr_prepare {
         File reads_1
         File reads_2
         File strainge_db_config  # TSV containing database names and paths
-        Array[String] straingst_selected_db
-        Array[String] straingst_strains
+        String straingst_selected_db
+        String straingst_strains
         Int kmer_size
         Int insert_size = 300
         Int memory = 64

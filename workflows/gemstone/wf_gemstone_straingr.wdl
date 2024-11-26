@@ -12,8 +12,8 @@ workflow straingr {
         Array[File] reads_1
         Array[File] reads_2
         File strainge_db_config
-        Array[Array[String]] straingst_selected_dbs
-        Array[Array[String]] straingst_strains
+        Array[String] straingst_selected_dbs
+        Array[String] straingst_strains
         Int kmer_size
         Int insert_size = 300
         Int straingr_prepare_memory = 64

@@ -5,8 +5,8 @@ task select_straingr_inputs {
     String samplename
     String genus
     File strainge_db_config  # TSV containing database names and paths
-    Array[String] straingst_selected_db
-    Array[String] straingst_strains
+    String straingst_selected_db
+    String straingst_strains
     Int disk_size = 4
   }
   command <<<
@@ -38,8 +38,10 @@ task select_straingr_inputs {
   # Select the StrainGST report file matching the desired genus
   if matched:
     found_report = False
-    straingst_dbs = "~{sep=' ' straingst_selected_db}".split(" ")
-    strains_tsvs = "~{sep=' ' straingst_strains}".split(" ")
+    straingst_dbs = [x.removepreffix("[").removesuffix("]") 
+      for x in "~{straingst_selected_db}".split(" ")]
+    strains_tsvs = [x.removepreffix("[").removesuffix("]") 
+      for x in "~{straingst_strains}".split(" ")]
     for a, b in zip(straingst_dbs, strains_tsvs):
       print(a, b)
       if a == db: 
