@@ -8,7 +8,7 @@ task straingr_compare {
     String samplename_2
     File variants_1
     File variants_2
-    String docker = "marcoteix/strainge:1.0.0"
+    String docker = "marcoteix/strainge:1.0.1"
     Int disk_size = 8
     Int memory = 8
   }
@@ -17,12 +17,10 @@ task straingr_compare {
 
     echo "Comparing variants in samples ~{samplename_1} and ~{samplename_2}..."
     $base/straingr compare ~{variants_1} ~{variants_2} \
-        -o ~{samplename_1}.vs.~{samplename_2}.summary.tsv \
-        -d ~{samplename_1}.vs.~{samplename_2}.details.tsv
+        -o ~{samplename_1}.vs.~{samplename_2}.summary.tsv
   >>>
   output {
     File straingr_summary = "~{samplename_1}.vs.~{samplename_2}.summary.tsv"
-    File straingr_details = "~{samplename_1}.vs.~{samplename_2}.details.tsv"
   }
   runtime {
     docker: "~{docker}"

@@ -12,7 +12,11 @@ RUN conda config \
     --add channels defaults \
     --add channels bioconda \
     --add channels conda-forge; \
-    conda create -n strainge python=3.8 strainge pandas=1.5.3 scikit-bio==0.5.6 mummer samtools bwa
+    conda create -n strainge 
+RUN mamba activate strainge; \
+    mamba install python=3.8 strainge pandas=1.5.3 scikit-bio==0.5.6 mummer samtools bwa
+
+ENV PATH="$PATH:/opt/conda/envs/strainge/bin"
 
 SHELL ["conda", "run", "-n", "strainge", "/bin/bash", "-c"]
 

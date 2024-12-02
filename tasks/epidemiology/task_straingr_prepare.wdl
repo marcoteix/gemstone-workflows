@@ -9,7 +9,7 @@ task straingr_prepare {
     File strainge_db
     File straingst_strains
     Int insert_size = 300
-    String docker = "marcoteix/strainge:1.0.0"
+    String docker = "marcoteix/strainge:1.0.1"
     Int disk_size = 100
     Int cpus = 4
     Int memory = 64
