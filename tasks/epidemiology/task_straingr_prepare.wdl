@@ -23,33 +23,33 @@ task straingr_prepare {
 
     base="/opt/conda/envs/strainge/bin"
 
-    $base/strainge --version > VERSION.txt
+    strainge --version > VERSION.txt
 
     # Prepare the reference for alignment
     echo "Preparing the reference sequence for alignment..."
-    $base/straingr prepare-ref \
+    straingr prepare-ref \
         -s ~{straingst_strains} \
         -p "$fastas_dir/{ref}.fa.gz" \
         -S "$similarities" \
         -o ~{samplename}_refs_concat.fasta
     # Index the reference FASTA
     echo "Indexing the reference FASTA..."
-    $base/bwa index ~{samplename}_refs_concat.fasta
+    bwa index ~{samplename}_refs_concat.fasta
     # Align
     echo "Aligning reads with bwa mem..."
-    $base/bwa mem \
+    bwa mem \
         -I ~{insert_size} \
         -t ~{cpus} \
         ~{samplename}_refs_concat.fasta \
         ~{reads_1} ~{reads_2} | \
-        $base/samtools sort -@ 2 -O BAM \
+        samtools sort -@ 2 -O BAM \
         -o ~{samplename}_straingr_alignment.bam
     # Index BAM file
     echo "Indexing BAM..."
-    $base/samtools index ~{samplename}_straingr_alignment.bam
+    samtools index ~{samplename}_straingr_alignment.bam
     # Call variants
     echo "Calling variants..."
-    $base/straingr call ~{samplename}_refs_concat.fasta \
+    straingr call ~{samplename}_refs_concat.fasta \
         ~{samplename}_straingr_alignment.bam \
         --hdf5-out ~{samplename}_straingr_variants.hdf5 \
         --summary ~{samplename}_straingr.tsv

@@ -22,17 +22,17 @@ task strainge {
     similarities="database/similarities.tsv"
     hdf5=$(dir database/*.hdf5)
     echo $hdf5 > ~{samplename}_reference_used.txt
-    /opt/conda/envs/strainge/bin/strainge --version > VERSION.txt
-    /opt/conda/envs/strainge/bin/straingst kmerize -k ~{kmer_size} -o ~{samplename}_kmerized_reads.hdf5 ~{reads_1} ~{reads_2}
+    strainge --version > VERSION.txt
+    straingst kmerize -k ~{kmer_size} -o ~{samplename}_kmerized_reads.hdf5 ~{reads_1} ~{reads_2}
     echo run -O -o ~{samplename}_straingst_results $hdf5 ~{samplename}_kmerized_reads.hdf5
-    /opt/conda/envs/strainge/bin/straingst run -i ~{max_strains} -O -o ~{samplename}_straingst_results $hdf5 ~{samplename}_kmerized_reads.hdf5
+    straingst run -i ~{max_strains} -O -o ~{samplename}_straingst_results $hdf5 ~{samplename}_kmerized_reads.hdf5
     if [ "~{prepare_straingr}" = true ]; then
-    /opt/conda/envs/strainge/bin/straingr prepare-ref -s ~{samplename}_straingst_results.strains.tsv -p "$fastas_dir/{ref}.fa.gz" \
+    straingr prepare-ref -s ~{samplename}_straingst_results.strains.tsv -p "$fastas_dir/{ref}.fa.gz" \
         -S "$similarities" -o ~{samplename}_refs_concat.fasta
-    /opt/conda/envs/strainge/bin/bwa index ~{samplename}_refs_concat.fasta
-    /opt/conda/envs/strainge/bin/bwa mem -I 300 -t 2 ~{samplename}_refs_concat.fasta ~{reads_1} ~{reads_2} | /opt/conda/envs/strainge/bin/samtools sort -@ 2 -O BAM -o ~{samplename}_straingr_alignment.bam
-    /opt/conda/envs/strainge/bin/samtools index ~{samplename}_straingr_alignment.bam
-    /opt/conda/envs/strainge/bin/straingr call ~{samplename}_refs_concat.fasta ~{samplename}_straingr_alignment.bam --hdf5-out \
+    bwa index ~{samplename}_refs_concat.fasta
+    bwa mem -I 300 -t 2 ~{samplename}_refs_concat.fasta ~{reads_1} ~{reads_2} | samtools sort -@ 2 -O BAM -o ~{samplename}_straingr_alignment.bam
+    samtools index ~{samplename}_straingr_alignment.bam
+    straingr call ~{samplename}_refs_concat.fasta ~{samplename}_straingr_alignment.bam --hdf5-out \
         ~{samplename}_straingr_variants.hdf5 --summary ~{samplename}_straingr.tsv --tracks all
     fi
   >>>

@@ -16,7 +16,7 @@ task straingr_compare {
     base="/opt/conda/envs/strainge/bin"
 
     echo "Comparing variants in samples ~{samplename_1} and ~{samplename_2}..."
-    $base/straingr compare ~{variants_1} ~{variants_2} \
+    straingr compare ~{variants_1} ~{variants_2} \
         -o ~{samplename_1}.vs.~{samplename_2}.summary.tsv
   >>>
   output {
