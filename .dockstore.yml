@@ -30,3 +30,6 @@ workflows:
  - name: GEMSTONE_StrainGR
    subclass: WDL
    primaryDescriptorPath: /workflows/gemstone/wf_gemstone_straingr.wdl
+ - name: StrainGR_prepare
+   subclass: WDL
+   primaryDescriptorPath: /workflows/standalone_modules/wf_straingr_prepare.wdl

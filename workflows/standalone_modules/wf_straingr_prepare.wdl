@@ -42,7 +42,8 @@ workflow straingr_prepare {
     }
     output {
         File straingr_variants_hdf5 = straingr_prepare.straingr_variants_hdf5
-        File straingr_variants_vcf = straingr_prepare.straingr_variants_vcf
-        String strainge_version = straingr_prepare.strainge_version
+        File straingr_variants_summary = straingr_prepare.straingr_summary
+        String strainge_version = straingr_prepare.strainge_version 
+        String strainge_docker = straingr_prepare.strainge_docker
     }
 }

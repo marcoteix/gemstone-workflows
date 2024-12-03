@@ -58,7 +58,7 @@ task straingr_prepare {
   output {
     File straingr_concat_fasta = "~{samplename}_refs_concat.fasta"
     File straingr_variants_hdf5 = "~{samplename}_straingr_variants.hdf5"
-    File straingr_variants_vcf = "~{samplename}_straingr.tsv"
+    File straingr_summary = "~{samplename}_straingr.tsv"
     String strainge_docker = "~{docker}"    
     String strainge_version = read_string("VERSION.txt")
   }
