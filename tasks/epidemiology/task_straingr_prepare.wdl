@@ -8,7 +8,7 @@ task straingr_prepare {
     File strainge_db
     File straingst_strains
     String docker = "marcoteix/strainge:1.0.1"
-    Int disk_size = 16
+    Int disk_size = 32
     Int cpus = 1
     Int memory = 16
   }
@@ -87,6 +87,8 @@ task straingr_call {
   }
   command <<<
 
+    strainge --version > VERSION.txt
+
     # Index the reference FASTA
     echo "Indexing the reference FASTA..."
     bwa index ~{reference_fasta}
@@ -116,6 +118,7 @@ task straingr_call {
     File straingr_variants_hdf5 = "~{samplename}_straingr_variants.hdf5"
     File straingr_summary = "~{samplename}_straingr.tsv"
     String strainge_docker = "~{docker}"    
+    String strainge_version = read_string("VERSION.txt")
   }
   runtime {
     docker: "~{docker}"
