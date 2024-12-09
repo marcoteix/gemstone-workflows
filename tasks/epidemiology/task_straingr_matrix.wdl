@@ -22,10 +22,10 @@ task straingr_gather_query {
   queries = "~{sep=' ' query_names}".split(" ")
   summaries = "~{sep=' ' straingr_summaries}".split(" ")
 
-  # Concatenate summary files, excluding the TOTAL line
+  # Concatenate summary files
   X = pd.concat(
     {
-      k: pd.read_csv(v, index_col=0, sep="\t").assign(query_id=k).drop("TOTAL").reset_index()
+      k: pd.read_csv(v, index_col=0, sep="\t").assign(query_id=k).reset_index()
       for k,v in zip(queries, summaries)
     }
   ).assign(reference_id="~{reference_name}")
