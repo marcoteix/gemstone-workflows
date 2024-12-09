@@ -13,8 +13,6 @@ workflow straingr_prepare {
         File strainge_db_config  # TSV containing database names and paths
         String straingst_selected_db
         String straingst_strains
-        Int kmer_size
-        Int insert_size = 300
         Int memory = 64
         Int cpus = 4
         Int disk_size = 100
@@ -32,17 +30,15 @@ workflow straingr_prepare {
             samplename = samplename,
             reads_1 = reads_1,
             reads_2 = reads_2,
-            kmer_size = kmer_size,
             strainge_db = select_straingr_inputs.selected_db,
             straingst_strains = select_straingr_inputs.straingst_strains,
-            insert_size = insert_size,
             disk_size = disk_size,
             cpus = cpus,
             memory = memory
     }
     output {
-        File straingr_variants_hdf5 = straingr_prepare.straingr_variants_hdf5
-        File straingr_variants_summary = straingr_prepare.straingr_summary
+        File straingr_concat_fasta = straingr_prepare.straingr_concat_fasta
+        File straingr_repetitiveness = straingr_prepare.straingr_repetitiveness
         String strainge_version = straingr_prepare.strainge_version 
         String strainge_docker = straingr_prepare.strainge_docker
     }
