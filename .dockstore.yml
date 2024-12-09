@@ -33,3 +33,6 @@ workflows:
  - name: StrainGR_prepare
    subclass: WDL
    primaryDescriptorPath: /workflows/standalone_modules/wf_straingr_prepare.wdl
+ - name: StrainGR_compare
+   subclass: WDL
+   primaryDescriptorPath: /workflows/standalone_modules/wf_straingr_compare.wdl

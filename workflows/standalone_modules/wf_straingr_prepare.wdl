@@ -19,8 +19,6 @@ workflow straingr_prepare {
         call straingr_prepare_task.straingr_prepare {
             input:
                 samplename = samplename,
-                reads_1 = reads_1,
-                reads_2 = reads_2,
                 strainge_db = straingst_selected_dbs[i],
                 straingst_strains = straingst_strains[i]
         }

@@ -3,8 +3,6 @@ version 1.0
 task straingr_prepare {
   input {
     String samplename
-    File reads_1
-    File reads_2
     File strainge_db
     File straingst_strains
     String docker = "marcoteix/strainge:1.0.1"
@@ -49,7 +47,6 @@ task straingr_prepare {
 task straingr_concatenate_references {
   input {
     Array[File] reference_fastas
-    String docker = "marcoteix/strainge:1.0.1"
     Int disk_size = 32
     Int cpus = 1
     Int memory = 32

@@ -33,6 +33,37 @@ task straingr_compare {
   }
 }
 
+task straingr_distances {
+  input {
+    String samplename_1
+    String samplename_2
+    File variants_1
+    File variants_2
+    String docker = "marcoteix/strainge:1.0.1"
+    Int disk_size = 8
+    Int memory = 8
+  }
+  command <<<
+    base="/opt/conda/envs/strainge/bin"
+
+    echo "Comparing variants in samples ~{samplename_1} and ~{samplename_2}..."
+    straingr compare ~{variants_1} ~{variants_2} \
+        -o ~{samplename_1}.vs.~{samplename_2}.summary.tsv
+  >>>
+  output {
+    File straingr_summary = "~{samplename_1}.vs.~{samplename_2}.summary.tsv"
+  }
+  runtime {
+    docker: "~{docker}"
+    memory: "~{memory} GB"
+    cpu: 1
+    disks: "local-disk " + disk_size + " SSD"
+    disk: disk_size + " GB"
+    maxRetries: 0
+    preemptible: 0
+  }
+}
+
 workflow straingr_compare_query {
   meta {
     description: "Uses StrainGR to compare one sample against a set of samples."
