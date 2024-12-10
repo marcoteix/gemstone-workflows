@@ -12,7 +12,6 @@ workflow straingr {
         Array[File] reads_2
         Array[String] straingst_selected_dbs
         Array[String] straingst_strains
-        Int kmer_size
         Int insert_size = 300
         Int straingr_prepare_memory = 64
         Int straingr_prepare_cpus = 4
