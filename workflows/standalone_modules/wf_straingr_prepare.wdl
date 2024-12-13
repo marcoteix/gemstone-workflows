@@ -16,7 +16,7 @@ workflow straingr_prepare {
         Int disk_size = 100
     }
     scatter (i in range(length(straingst_strains))) {
-        call straingr_prepare_task.straingr_prepare {
+        call straingr_prepare_task.straingr_prepare as prepare_reference {
             input:
                 samplename = samplename,
                 strainge_db = straingst_selected_dbs[i],
@@ -25,7 +25,7 @@ workflow straingr_prepare {
     }
     call straingr_prepare_task.straingr_concatenate_references {
         input:
-            reference_fastas = straingr_prepare.straingr_concat_fasta
+            reference_fastas = prepare_reference.straingr_concat_fasta
             
     }
     call straingr_prepare_task.straingr_call {
@@ -40,7 +40,7 @@ workflow straingr_prepare {
             memory = memory
     }
     output {
-        Array[File] straingr_repetitiveness = straingr_prepare.straingr_repetitiveness
+        Array[File] straingr_repetitiveness = prepare_reference.straingr_repetitiveness
         File straingr_variants_hdf5 = straingr_call.straingr_variants_hdf5
         File straingr_summary = straingr_call.straingr_summary
         String strainge_version = straingr_call.strainge_version 

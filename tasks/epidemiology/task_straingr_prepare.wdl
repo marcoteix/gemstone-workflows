@@ -8,7 +8,7 @@ task straingr_prepare {
     String docker = "marcoteix/strainge:1.0.1"
     Int disk_size = 32
     Int cpus = 1
-    Int memory = 16
+    Int memory = 32
   }
   command <<<
     # Decompress reference database
