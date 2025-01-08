@@ -259,11 +259,11 @@ workflow gemstone_isolates {
       input:
         raw_read_screen = raw_check_reads.read_screen,
         clean_read_screen = clean_check_reads.read_screen,
-        est_coverage_clean = cg_pipeline_clean.est_coverage,
+        est_coverage_clean = select_first([cg_pipeline_clean.est_coverage, 1]),
         species = lab_determined_genus,
         gambit_predicted_taxon = gambit.gambit_predicted_taxon,
-        checkm2_completeness = checkm2.completeness,
-        checkm2_contamination = checkm2.contamination,
+        checkm2_completeness = select_first([checkm2.completeness, 0]),
+        checkm2_contamination = select_first([checkm2.contamination, 100]),
         min_coverage = min_coverage,
         max_contamination = contamination_threshold,
         min_completeness = min_completeness
