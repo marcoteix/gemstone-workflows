@@ -22,10 +22,19 @@ task cleansweep_filter {
   }
   command <<<
 
+    echo "Compressing and indexing VCF..."
+
+    bcftools view \
+      ~{variants_vcf} \
+      -o ~{samplename}/~{samplename}.pilon.vcf.gz \
+      -O z
+
+    bcftools index ~{samplename}/~{samplename}.pilon.vcf.gz
+
     echo "Filtering variants with CleanSweep..."
 
     cleansweep filter \
-        ~{variants_vcf} \
+        ~{samplename}/~{samplename}.pilon.vcf.gz \
         ~{cleansweep_prepare_swp} \
         ~{samplename} \
         --min-depth ~{min_depth} \
