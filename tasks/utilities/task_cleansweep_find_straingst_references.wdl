@@ -73,6 +73,8 @@ task find_straingst_references {
           ].values
         )
       )
+    
+    CODE
   >>>
   output {
     File query_fasta = read_string("query.txt")
