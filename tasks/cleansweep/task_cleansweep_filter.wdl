@@ -35,13 +35,15 @@ task cleansweep_filter {
         --max-overdispersion ~{max_overdispersion} \
         --n-coverage-sites ~{num_variants_coverage} \
         --seed ~{random_state} \
-        --n_chains ~{num_chains} \
-        --n_draws ~{num_draws} \
-        --n_burnin ~{num_burnin} \
+        --n-chains ~{num_chains} \
+        --n-draws ~{num_draws} \
+        --n-burnin ~{num_burnin} \
         --threads ~{cpu} \
         --verbosity 4
 
     echo "Running CleanSweep inspect..."
+
+    mkdir -p ~{samplename}/inspect
 
     cleansweep inspect \
         ~{samplename}/cleansweep.variants.vcf \
