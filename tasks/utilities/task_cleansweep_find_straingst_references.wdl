@@ -56,7 +56,7 @@ task find_straingst_references {
         )
     )
 
-    with open(query.txt, "w") as file:
+    with open("query.txt", "w") as file:
       file.write(
         straingst.loc[
           straingst.strain.eq(query),
@@ -64,7 +64,7 @@ task find_straingst_references {
         ].iloc[0]
       )
 
-    with open(background.txt, "w") as file:
+    with open("background.txt", "w") as file:
       file.write(
         "\n".join(
           straingst.loc[
