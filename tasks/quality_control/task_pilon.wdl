@@ -7,6 +7,8 @@ task pilon {
     File bai
     String samplename
     String docker = "us-docker.pkg.dev/general-theiagen/biocontainers/pilon:1.24--hdfd78af_0"
+    String fix = "all"
+    String extra_options = ""
     Int cpu = 8
     Int memory = 32
     Int disk_size = 100
@@ -21,7 +23,9 @@ task pilon {
     --frags ~{bam} \
     --output ~{samplename} \
     --outdir pilon \
-    --changes --vcf
+    --changes \
+    --vcf \
+    --fix ~{fix} ~{extra_options}
 
   >>>
   output {

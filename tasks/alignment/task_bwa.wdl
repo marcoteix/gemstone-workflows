@@ -8,6 +8,11 @@ task bwa {
     File? reference_genome
     Int cpu = 6
     Int disk_size = 100
+    Int open = 6
+    Int extend = 1
+    Int clip = 5 
+    Int unpaired = 9
+    Int mismatch = 4
   }
   command <<<
     # date and version control
@@ -26,9 +31,14 @@ task bwa {
     fi
 
     # Map with BWA MEM
-    echo "Running bwa mem -t ~{cpu} ${ref_genome} ~{read1} ~{read2} | samtools sort | samtools view -F 4 -o ~{samplename}.sorted.bam "
+    echo "Running bwa mem -t ~{cpu} -O ~{open} -E ~{extend} -L ~{clip} -U ~{unpaired} -B ~{mismatch} ${ref_genome} ~{read1} ~{read2} | samtools sort | samtools view -F 4 -o ~{samplename}.sorted.bam "
     bwa mem \
     -t ~{cpu} \
+    -O ~{open} \
+    -E ~{extend} \
+    -L ~{clip} \
+    -U ~{unpaired} \
+    -B ~{mismatch} \
     "${ref_genome}" \
     ~{read1} ~{read2} |\
     samtools sort | samtools view -F 4 -o ~{samplename}.sorted.bam
