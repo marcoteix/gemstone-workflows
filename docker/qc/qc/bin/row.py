@@ -37,6 +37,9 @@ else:
                 qc_check = "ALERT"
                 qc_note = "Taxonomic mismatch"
 
+if qc_check == "PASS":
+    qc_note = ""
+
 # Write outputs
 outdir = Path(args.output)
 outdir.mkdir(parents=True, exist_ok=True)
