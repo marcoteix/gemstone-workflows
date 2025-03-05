@@ -24,6 +24,8 @@ task cleansweep_filter {
 
     echo "Compressing and indexing VCF..."
 
+    mkdir -p ~{samplename}
+
     bcftools view \
       ~{variants_vcf} \
       -o ~{samplename}/~{samplename}.pilon.vcf.gz \
