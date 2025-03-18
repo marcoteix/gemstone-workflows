@@ -39,3 +39,6 @@ workflows:
  - name: CleanSweep
    subclass: WDL
    primaryDescriptorPath: /workflows/gemstone/wf_gemstone_cleansweep.wdl
+ - name: Pilon_Variants
+   subclass: WDL
+   primaryDescriptorPath: /workflows/standalone_modules/wf_pilon_variants.wdl
