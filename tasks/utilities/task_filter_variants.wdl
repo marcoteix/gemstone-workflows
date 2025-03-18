@@ -11,7 +11,7 @@ task filter_variants {
     mkdir -p ~{samplename}
 
     bcftools view  \
-        ~{vcf}
+        ~{vcf} \
         -o ~{samplename}/~{samplename}.variants.vcf \
         -O v \
         -e 'INFO/AC = 0' \
