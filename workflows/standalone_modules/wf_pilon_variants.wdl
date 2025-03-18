@@ -43,7 +43,7 @@ workflow pilon_variants {
             samplename = samplename
     }
     output {
-        File variants_vcf = pilon.vcf
+        File variants_vcf = filter_variants.filtered_vcf
         String pilon_version = pilon.pilon_version
         String pilon_docker = pilon.pilon_docker
         String bwa_version = bwa.bwa_version
