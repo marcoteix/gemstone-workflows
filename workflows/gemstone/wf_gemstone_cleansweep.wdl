@@ -93,7 +93,7 @@ workflow cleansweep {
             num_variants_estimator = cleansweep_num_variants_estimator,
             num_variants_coverage = cleansweep_num_variants_coverage,
             max_overdispersion = cleansweep_max_overdispersion,
-            overdispersion_bias = overdispersion_bias,
+            overdispersion_bias = cleansweep_overdispersion_bias,
             random_state = cleansweep_random_state,
             num_chains = cleansweep_num_chains,
             num_draws = cleansweep_num_draws,
