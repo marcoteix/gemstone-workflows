@@ -108,12 +108,14 @@ task straingr_call {
     straingr call ~{reference_fasta} \
         ~{samplename}_straingr_alignment.bam \
         --hdf5-out ~{samplename}_straingr_variants.hdf5 \
+        --vcf ~{samplename}_straingr_variants.vcf \
         --summary ~{samplename}_straingr.tsv
     
   >>>
   output {
     File straingr_variants_hdf5 = "~{samplename}_straingr_variants.hdf5"
     File straingr_summary = "~{samplename}_straingr.tsv"
+    File straingr_variants_vcf = "~{samplename}_straingr_variants.vcf"
     String strainge_docker = "~{docker}"    
     String strainge_version = read_string("VERSION.txt")
   }
