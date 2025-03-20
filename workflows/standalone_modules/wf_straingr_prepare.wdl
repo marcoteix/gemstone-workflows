@@ -42,6 +42,7 @@ workflow straingr_prepare {
     output {
         Array[File] straingr_repetitiveness = prepare_reference.straingr_repetitiveness
         File straingr_variants_hdf5 = straingr_call.straingr_variants_hdf5
+        File straingr_variants_vcf = straingr_call.straingr_variants_vcf
         File straingr_summary = straingr_call.straingr_summary
         String strainge_version = straingr_call.strainge_version 
         String strainge_docker = straingr_call.strainge_docker
