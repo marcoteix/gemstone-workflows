@@ -10,7 +10,7 @@ task vcf_to_msa {
   command <<<
 
     # Write a list of input VCF paths 
-    echo ~{sep='\n' vcfs} > filelist.txt
+    echo "~{sep='\n' vcfs}" > filelist.txt
 
     echo "First lines of filelist.txt:"
     echo $(head filelist.txt)
@@ -27,14 +27,14 @@ task vcf_to_msa {
 
     echo "Generating MSA..."
 
-    ./vcf2phylip.py -i ~{collection_name}.merged.vcf.gz \
+    python ./vcf2phylip.py -i ~{collection_name}.merged.vcf.gz \
         --output-folder "msa" \
         --output-prefix ~{collection_name} \
         -f -p -m ~{min_samples}
 
     # Get versions
     bcftools --version | head -1 > bcftools_version.txt
-    ./vcf2phylip.py --version > vcf2phylip_version.txt
+    python ./vcf2phylip.py --version > vcf2phylip_version.txt
 
   >>>
   output {
