@@ -55,7 +55,7 @@ task vcf_to_msa {
     python /tmp/scripts/vcf2phylip.py -i ~{collection_name}.merged.vcf.gz \
         --output-folder "msa" \
         --output-prefix ~{collection_name} \
-        -f -p -m ~{min_samples}
+        -f -p -r -m ~{min_samples}
 
     # Get versions
     bcftools --version | head -1 > bcftools_version.txt

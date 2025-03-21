@@ -52,6 +52,6 @@ task gubbins {
     disks: "local-disk " + disk_size + " SSD"
     disk: disk_size + " GB"
     preemptible: 0
-    maxRetries: 3
+    maxRetries: 0
   }
 }
