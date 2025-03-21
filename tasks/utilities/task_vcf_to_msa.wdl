@@ -22,6 +22,8 @@ task vcf_to_msa {
     # Keep track of sample names so we can change the sample names in 
     # the merged VCF
     touch samplenames.txt
+    # Make a file with cleansweep VCF files
+    touch filelist.txt
 
     for i in "${!names[@]}"; do
 
@@ -39,11 +41,9 @@ task vcf_to_msa {
         bcftools index ./vcfs/$name.pass.vcf.gz
 
         echo $name >> samplenames.txt
+        echo $(pwd)/vcfs/$name.pass.vcf.gz >> filelist.txt
 
     done
-
-    # Make a file with cleansweep VCF files
-    dir ./vcfs/*.pass.vcf.gz > filelist.txt
 
     echo "First lines of filelist.txt:"
     echo $(head filelist.txt)
