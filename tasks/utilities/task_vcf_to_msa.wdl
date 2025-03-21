@@ -14,6 +14,8 @@ task vcf_to_msa {
     mkdir ./vcfs
 
     # Filter variants based on the CleanSweep filter
+    count=0
+
     for vcf in ~{sep=' ' vcfs}; do
 
         echo "Filtering and indexing $vcf..."
@@ -22,11 +24,13 @@ task vcf_to_msa {
 
         bcftools view $vcf \
             -f ~{filters} \
-            -o ./vcfs/${filename%.vcf}.pass.vcf.gz \
+            -o ./vcfs/${filename%.vcf}.$count.pass.vcf.gz \
             -O b
 
         # Index
-        bcftools index ./vcfs/${filename%.vcf}.pass.vcf.gz
+        bcftools index ./vcfs/${filename%.vcf}.$count.pass.vcf.gz
+
+        (( count++ ))
 
     done
 
