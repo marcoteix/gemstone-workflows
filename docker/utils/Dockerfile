@@ -16,7 +16,7 @@ RUN micromamba config append channels conda-forge
 RUN micromamba install -y -n base -f /tmp/requirements.yaml && \
     micromamba clean --all --yes
 
-COPY --chown=$MAMBA_USER:$MAMBA_USER scripts /tmp
+COPY --chown=$MAMBA_USER:$MAMBA_USER scripts scripts
 
 ARG MAMBA_DOCKERFILE_ACTIVATE=1
 
