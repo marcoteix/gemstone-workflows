@@ -28,8 +28,7 @@ workflow vcf_to_tree {
         call gubbins_task.gubbins {
             input:
                 alignment = vcf_to_msa.msa,
-                cluster_name = collection_name,
-                tree_builder = "iqtree"
+                cluster_name = collection_name
         }
     }
     # Create a ML tree with IQTree2
