@@ -2,6 +2,7 @@ version 1.0
 
 task vcf_to_msa {
   input {
+    Array[String] samplenames
     Array[File] vcfs
     String collection_name = "variants"
     String filters = "PASS,."
@@ -13,24 +14,31 @@ task vcf_to_msa {
 
     mkdir ./vcfs
 
-    # Filter variants based on the CleanSweep filter
-    count=0
+    # Filter variants based on the CleanSweep filter. Iterate over the
+    # sample names and VCF files simultaneously
+    names=( ~{sep=' ' samplenames} )
+    vcfs=( ~{sep=' ' vcfs} )
 
-    for vcf in ~{sep=' ' vcfs}; do
+    # Keep track of sample names so we can change the sample names in 
+    # the merged VCF
+    touch samplenames.txt
+
+    for i in "${!names[@]}"; do
+
+        name="${names[i]}"
+        vcf="${vcfs[i]}"
 
         echo "Filtering and indexing $vcf..."
 
-        filename=$(basename $vcf)
-
         bcftools view $vcf \
             -f ~{filters} \
-            -o ./vcfs/${filename%.vcf}.$count.pass.vcf.gz \
+            -o ./vcfs/$name.pass.vcf.gz \
             -O b
 
         # Index
-        bcftools index ./vcfs/${filename%.vcf}.$count.pass.vcf.gz
+        bcftools index ./vcfs/$name.pass.vcf.gz
 
-        (( count++ ))
+        echo $name >> samplenames.txt
 
     done
 
@@ -50,9 +58,17 @@ task vcf_to_msa {
         --force-samples \
         --missing-to-ref
 
+    # Change sample names in the merged VCF
+    echo "Replacing sample names in the merged VCF..."
+
+    bcftools view ~{collection_name}.merged.vcf.gz | \
+        bcftools reheader -s samplenames.txt | \
+        bcftools view -o ~{collection_name}.merged.vcf.gz -O b
+
     echo "Generating MSA..."
 
-    python /tmp/scripts/vcf2phylip.py -i ~{collection_name}.merged.vcf.gz \
+    python /tmp/scripts/vcf2phylip.py \
+        -i ~{collection_name}.merged.vcf.gz \
         --output-folder "msa" \
         --output-prefix ~{collection_name} \
         -f -p -r -m ~{min_samples}

@@ -8,6 +8,7 @@ import "../../tasks/phylogenetic_inference/task_snp_dists.wdl" as snp_dists_task
 workflow vcf_to_tree {
     input {
         String collection_name
+        Array[String] samplenames
         Array[File] variants_vcfs
         String vcf_filters = "PASS,."
         Int min_samples = 1
@@ -16,6 +17,7 @@ workflow vcf_to_tree {
     # Convert a set of VCFs to a multisequence alignment FASTA
     call vcf_to_msa_task.vcf_to_msa {
         input:
+            samplenames = samplenames,
             vcfs = variants_vcfs,
             collection_name = collection_name,
             filters = vcf_filters,
