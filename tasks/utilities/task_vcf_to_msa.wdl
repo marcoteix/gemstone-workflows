@@ -11,25 +11,27 @@ task vcf_to_msa {
   }
   command <<<
 
-    mkdir vcfs
+    mkdir ./vcfs
 
     # Filter variants based on the CleanSweep filter
     for vcf in ~{sep=' ' vcfs}; do
 
         echo "Filtering and indexing $vcf..."
 
+        filename=$(basename $vcf)
+
         bcftools view $vcf \
             -f ~{filters} \
-            -o vcfs/${vcf%.vcf}.pass.vcf.gz \
+            -o ./vcfs/${filename%.vcf}.pass.vcf.gz \
             -O b
 
         # Index
-        bcftools index vcfs/${vcf%.vcf}.pass.vcf.gz
+        bcftools index ./vcfs/${filename%.vcf}.pass.vcf.gz
 
     done
 
     # Make a file with cleansweep VCF files
-    dir vcfs/*.pass.vcf.gz > filelist.txt
+    dir ./vcfs/*.pass.vcf.gz > filelist.txt
 
     echo "First lines of filelist.txt:"
     echo $(head filelist.txt)
