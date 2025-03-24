@@ -6,6 +6,7 @@ task vcf_to_msa {
     Array[File] vcfs
     String collection_name = "variants"
     String filters = "PASS,."
+    String include = "INFO/MQ = 60 & INFO/BQ >= 35"
     Int min_samples = 1
     Int memory = 8
     Int disk_size = 16
@@ -34,6 +35,7 @@ task vcf_to_msa {
 
         bcftools view $vcf \
             -f ~{filters} \
+            -i '~{include}' \
             -o ./vcfs/$name.pass.vcf.gz \
             -O b
 

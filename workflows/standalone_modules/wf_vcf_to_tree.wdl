@@ -11,6 +11,7 @@ workflow vcf_to_tree {
         Array[String] samplenames
         Array[File] variants_vcfs
         String vcf_filters = "PASS,."
+        String vcf_include = "INFO/MQ = 60 & INFO/BQ >= 35"
         Int min_samples = 1
         Boolean use_gubbins = true
     }
@@ -21,6 +22,7 @@ workflow vcf_to_tree {
             vcfs = variants_vcfs,
             collection_name = collection_name,
             filters = vcf_filters,
+            include = vcf_include,
             min_samples = min_samples
     }
     # Mask recombinant regions with Gubbins
