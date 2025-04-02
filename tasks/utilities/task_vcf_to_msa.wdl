@@ -33,9 +33,9 @@ task vcf_to_msa {
 
         echo "Filtering and indexing $vcf..."
 
-        # Filter and replace genotype in heterozygous sites to homozygous alt
+        # Change all genotypes to homozygous alt
         bcftools view $vcf | \
-          sed -e 's/0\/1/1/g;s/0\/0/0/g;s/1\/1/1/g;s/1\/0/1/g' | \
+          sed -e 's/0\/1/1/g;s/0\/0/1/g;s/1\/1/1/g;s/1\/0/1/g' | \
           bcftools view \
             -f ~{filters} \
             -i '~{include}' \
