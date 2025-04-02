@@ -76,7 +76,7 @@ task vcf_to_msa {
         -i ~{collection_name}.merged.vcf.gz \
         --output-folder "msa" \
         --output-prefix ~{collection_name} \
-        -f -p -r -m ~{min_samples}
+        -f -p -m ~{min_samples}
 
     # Get versions
     bcftools --version | head -1 > bcftools_version.txt
