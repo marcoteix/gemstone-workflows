@@ -35,7 +35,7 @@ workflow cleansweep {
         Int cleansweep_num_variants_estimator = 200
         Int cleansweep_num_variants_coverage = 100000
         Float cleansweep_max_overdispersion = 0.55
-        Int cleansweep_overdispersion_bias = 500
+        Float cleansweep_overdispersion_bias = 0.05
         Int cleansweep_random_state = 23
         Int cleansweep_num_chains = 5
         Int cleansweep_num_draws = 100000

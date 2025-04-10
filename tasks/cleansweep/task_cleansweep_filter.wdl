@@ -11,7 +11,7 @@ task cleansweep_filter {
     Int num_variants_estimator = 200
     Int num_variants_coverage = 100000
     Float max_overdispersion = 0.55
-    Int overdispersion_bias = 500
+    Float overdispersion_bias = 0.05
     Int random_state = 23
     Int num_chains = 5
     Int num_draws = 100000
