@@ -79,9 +79,9 @@ task vcf_to_msa {
         -f -p -m 1
 
     python /tmp/scripts/filter_msa.py \
-        "msa/~{collection_name}.min~{min_samples}.fasta" \
+        "msa/~{collection_name}.min1.fasta" \
         -m ~{min_samples} \
-        -o "msa/~{collection_name}.min~{min_samples}.fasta"
+        -o "msa/~{collection_name}.fasta"
 
     # Get versions
     bcftools --version | head -1 > bcftools_version.txt
@@ -89,7 +89,7 @@ task vcf_to_msa {
 
   >>>
   output {
-    File msa = "msa/~{collection_name}.min~{min_samples}.fasta"
+    File msa = "msa/~{collection_name}.fasta"
     File merged_vcf = "~{collection_name}.merged.vcf.gz"
     String bcftools_version = read_string("bcftools_version.txt")
     String vcf2phylip_version = read_string("vcf2phylip_version.txt")
