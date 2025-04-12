@@ -76,7 +76,12 @@ task vcf_to_msa {
         -i ~{collection_name}.merged.vcf.gz \
         --output-folder "msa" \
         --output-prefix ~{collection_name} \
-        -f -p -m ~{min_samples}
+        -f -p -m 1
+
+    python /tmp/scripts/filter_msa.py \
+        "msa/~{collection_name}.min~{min_samples}.fasta" \
+        -m ~{min_samples} \
+        -o "msa/~{collection_name}.min~{min_samples}.fasta"
 
     # Get versions
     bcftools --version | head -1 > bcftools_version.txt
