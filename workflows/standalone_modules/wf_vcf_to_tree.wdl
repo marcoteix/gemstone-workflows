@@ -48,6 +48,7 @@ workflow vcf_to_tree {
     output {
 
         File msa_fasta = select_first([gubbins.gubbins_polymorphic_fasta, vcf_to_msa.msa])
+        File merged_vcf = vcf_to_msa.merged_vcf
         File vcf_to_tree_final_tree = iqtree2.ml_tree
 
         # Gubbins outputs

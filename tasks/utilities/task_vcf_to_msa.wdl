@@ -85,6 +85,7 @@ task vcf_to_msa {
   >>>
   output {
     File msa = "msa/~{collection_name}.min~{min_samples}.fasta"
+    File merged_vcf = "~{collection_name}.merged.vcf.gz"
     String bcftools_version = read_string("bcftools_version.txt")
     String vcf2phylip_version = read_string("vcf2phylip_version.txt")
   }
