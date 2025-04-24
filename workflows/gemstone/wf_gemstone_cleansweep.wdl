@@ -28,6 +28,11 @@ workflow cleansweep {
         # Alignment options
         Int alignment_cpu = 6
         Int alignment_disk_size = 32
+        Int alignment_open = 36
+        Int alignment_extend = 36
+        Int alignment_clip = 40
+        Int alignment_unpaired = 54
+        Int alignment_mismatch = 24
         # Cleansweep filter options
         Int cleansweep_min_depth = 10
         Int cleansweep_min_alt_bc = 10
@@ -67,11 +72,11 @@ workflow cleansweep {
             reference_genome = prepare_straingst.cleansweep_reference_fasta,
             cpu = alignment_cpu,
             disk_size = alignment_disk_size,
-            open = 36,
-            extend = 36,
-            clip = 40,
-            unpaired = 54,
-            mismatch = 24
+            open = alignment_open,
+            extend = alignment_extend,
+            clip = alignment_clip,
+            unpaired = alignment_unpaired,
+            mismatch = alignment_mismatch
     }
     call pilon.pilon {
         input:
