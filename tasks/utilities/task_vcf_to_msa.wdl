@@ -67,8 +67,9 @@ task vcf_to_msa {
     echo "Replacing sample names in the merged VCF..."
 
     bcftools view ~{collection_name}.merged.vcf.gz | \
-        bcftools reheader -s samplenames.txt | \
-        bcftools view -o ~{collection_name}.merged.vcf.gz -O b
+        bcftools reheader -s samplenames.txt -o ~{collection_name}.merged.vcf
+
+    bcftools view -o ~{collection_name}.merged.vcf.gz -O b ~{collection_name}.merged.vcf
 
     echo "Generating MSA..."
 
