@@ -70,25 +70,26 @@ task straingr_concatenate_references {
   }
 }
 
-task straingr_call {
+task straingr_align {
   input {
-    String samplename
-    File reads_1
-    File reads_2
+    String samplename 
+    File reads_1 
+    File reads_2 
     File reference_fasta
     Int insert_size = 300
     String docker = "marcoteix/strainge:1.0.1"
     Int disk_size = 100
     Int cpus = 4
-    Int memory = 64
+    Int memory = 64    
   }
   command <<<
-
+    
     strainge --version > VERSION.txt
 
     # Index the reference FASTA
     echo "Indexing the reference FASTA..."
     bwa index ~{reference_fasta}
+
     # Align
     echo "Aligning reads with bwa mem..."
     bwa mem \
@@ -99,14 +100,41 @@ task straingr_call {
         samtools sort -@ 2 -O BAM \
         -o ~{samplename}_straingr_alignment.bam
 
+  >>>
+  output {
+    File alignment_bam = "~{samplename}_straingr_alignment.bam"
+  }
+  runtime {
+    docker: "~{docker}"
+    memory: "~{memory} GB"
+    cpu: cpus
+    disks: "local-disk " + disk_size + " SSD"
+    disk: disk_size + " GB"
+    maxRetries: 0
+    preemptible: 0
+  }
+}
+
+task straingr_call {
+  input {
+    String samplename
+    File reference_fasta
+    File alignment_bam
+    String docker = "marcoteix/strainge:1.0.1"
+    Int disk_size = 64
+    Int cpus = 1
+    Int memory = 8
+  }
+  command <<<
+
     # Index BAM file
     echo "Indexing BAM..."
-    samtools index ~{samplename}_straingr_alignment.bam
+    samtools index ~{alignment_bam}
 
     # Call variants
     echo "Calling variants..."
     straingr call ~{reference_fasta} \
-        ~{samplename}_straingr_alignment.bam \
+        ~{alignment_bam} \
         --hdf5-out ~{samplename}_straingr_variants.hdf5 \
         --vcf ~{samplename}_straingr_variants.vcf \
         --summary ~{samplename}_straingr.tsv

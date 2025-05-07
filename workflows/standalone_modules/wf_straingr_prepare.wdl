@@ -11,9 +11,12 @@ workflow straingr_prepare {
         Array[File] straingst_strains
         Array[File] straingst_selected_dbs
         Int insert_size = 300
-        Int memory = 64
-        Int cpus = 4
-        Int disk_size = 100
+        Int alignment_memory = 64
+        Int alignment_cpus = 4
+        Int alignment_disk_size = 100
+        Int call_memory = 8
+        Int call_cpus = 1
+        Int call_disk_size = 32
     }
     scatter (i in range(length(straingst_strains))) {
         call straingr_prepare_task.straingr_prepare as prepare_reference {
@@ -28,16 +31,25 @@ workflow straingr_prepare {
             reference_fastas = prepare_reference.straingr_concat_fasta
             
     }
-    call straingr_prepare_task.straingr_call {
+    call straingr_prepare_task.straingr_align {
         input:
             samplename = samplename,
             reads_1 = reads_1,
             reads_2 = reads_2,
             reference_fasta = straingr_concatenate_references.straingr_concat_fasta,
             insert_size = insert_size,
-            disk_size = disk_size,
-            cpus = cpus,
-            memory = memory
+            disk_size = alignment_disk_size,
+            cpus = alignment_cpus,
+            memory = alignment_memory
+    }
+    call straingr_prepare_task.straingr_call {
+        input:
+            samplename = samplename,
+            reference_fasta = straingr_concatenate_references.straingr_concat_fasta,
+            alignment_bam = straingr_align.alignment_bam,
+            disk_size = call_disk_size,
+            cpus = call_cpus,
+            memory = call_memory
     }
     output {
         Array[File] straingr_repetitiveness = prepare_reference.straingr_repetitiveness
