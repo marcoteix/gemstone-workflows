@@ -83,8 +83,6 @@ task straingr_align {
     Int memory = 64    
   }
   command <<<
-    
-    strainge --version > VERSION.txt
 
     # Index the reference FASTA
     echo "Indexing the reference FASTA..."
@@ -126,6 +124,8 @@ task straingr_call {
     Int memory = 8
   }
   command <<<
+
+    strainge --version > VERSION.txt
 
     # Index BAM file
     echo "Indexing BAM..."
