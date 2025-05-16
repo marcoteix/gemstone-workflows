@@ -50,6 +50,18 @@ task vcf_to_msa {
 
     done
 
+    # Create a "dummy" VCF file to use as outgroup
+    echo "Creating outgroup VCF file..."
+
+    bcftools view \
+      -h \
+      -o ./vcfs/outgroup.vcf \
+      -O b \
+      ./vcfs/$name.pass.vcf.gz
+
+    echo "reference" >> samplenames.txt
+    echo $(pwd)/vcfs/outgroup.vcf >> filelist.txt
+
     echo "First lines of filelist.txt:"
     echo $(head filelist.txt)
 
