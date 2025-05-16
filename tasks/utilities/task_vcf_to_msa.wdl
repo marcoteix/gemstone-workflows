@@ -59,6 +59,8 @@ task vcf_to_msa {
       -O b \
       ./vcfs/$name.pass.vcf.gz
 
+    bcftools index ./vcfs/outgroup.vcf
+
     echo "reference" >> samplenames.txt
     echo $(pwd)/vcfs/outgroup.vcf >> filelist.txt
 
