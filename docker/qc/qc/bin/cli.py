@@ -17,6 +17,18 @@ the output directory: qc_check (containing a final QC flag) and qc_note (reason 
         self.__qc_row_args()
         self.__qc_args()
         return self.__cast_qc_row(self.parser.parse_args())
+    
+    def qc_row_cauris(self) -> argparse.Namespace:
+
+        self.__parser(
+            name = "C. auris QC flags - input as a row",
+            description = "Takes C. auris QC metrics as input, generates QC flags, and writes two files to \
+the output directory: qc_check (containing a final QC flag) and qc_note (reason for failure)."
+        )
+        self.__qc_row_cauris_args()
+        self.__qc_args()
+
+        return self.__cast_qc_row(self.parser.parse_args())
 
     def qc_table(self) -> argparse.Namespace:
 
@@ -64,6 +76,26 @@ help="Column \"est_coverage_clean\".")
         self.io_group.add_argument("--lab-species", "-ls", type=str, required=True,
 help="Column \"species\".")
         self.io_group.add_argument("--gambit-taxon", "-g", type=str, required=True,
+help="Column \"gambit_predicted_taxon\".")
+        self.io_group.add_argument("--contamination", "-c", type=str, required=True,
+help="Column \"checkm2_contamination\".")
+        self.io_group.add_argument("--completeness", "-C", type=str, required=True,
+help="Column \"checkm2_completeness\".")
+        self.io_group.add_argument("--output", "-o", type=str, required=True,
+help="Output directory.")
+        
+    def __qc_row_cauris_args(self):
+
+        self.io_group = self.parser.add_argument_group("Input/Output")
+        self.io_group.add_argument("--raw-read-screen", "-rs", type=str, required=True,
+help="Column \"raw_read_screen\".")
+        self.io_group.add_argument("--clean-read-screen", "-cs", type=str, required=True,
+help="Column \"clean_read_screen\".")
+        self.io_group.add_argument("--coverage", "-x", type=str, required=True,
+help="Column \"est_coverage_clean\".")
+        self.io_group.add_argument("--gambit-taxon", "-g", type=str, required=True,
+help="Column \"gambit_predicted_taxon\".")
+        self.io_group.add_argument("--kraken2_taxon", "-k", type=str, required=True,
 help="Column \"gambit_predicted_taxon\".")
         self.io_group.add_argument("--contamination", "-c", type=str, required=True,
 help="Column \"checkm2_contamination\".")
