@@ -73,7 +73,7 @@ task top_bracken_taxa {
   >>>
   output {
     String bracken_most_abundant_species = read_string("top_species.txt")
-    String bracken_most_abundant_genus = read_string("top_genera.txt")
+    String bracken_most_abundant_genus = read_string("top_genus.txt")
     String bracken_genera = read_string("genera.txt")
     String bracken_species = read_string("species.txt")
   }
