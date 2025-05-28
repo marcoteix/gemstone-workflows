@@ -50,3 +50,11 @@ workflows:
     - name: Marco Teixeira
       email: mcarvalh@broadinstitute.org
    topic: Builds a Maximum Likelihood tree from a set of VCF files.
+ - name: Top_Bracken_Taxa
+   subclass: WDL
+   primaryDescriptorPath: /workflows/standalone_modules/wf_top_bracken_taxa.wdl
+   authors:
+    - orcid: 0000-0002-7219-0478
+    - name: Marco Teixeira
+      email: mcarvalh@broadinstitute.org
+   topic: Utility worflow to fetch the most abundance genera and species from a Bracken report. Also outputs the name of all species and genera above 1%.

@@ -3,3 +3,4 @@ tests/inputs
 tests
 tests/config
 tests/workflows
+tmp/

@@ -12,6 +12,7 @@ import "../../tasks/gene_typing/task_mob_suite.wdl" as mob_suite_task
 import "../../tasks/gene_typing/task_bakta.wdl" as bakta_task
 import "../../tasks/gene_typing/task_amrfinderplus.wdl" as amrfinderplus
 import "../standalone_modules/wf_strainge_pe.wdl" as strainge_wf
+import "../../tasks/utilities/task_top_bracken_taxa.wdl" as top_bracken_taxa_task
 
 workflow gemstone_plate_swipes {
   meta {
@@ -79,6 +80,11 @@ workflow gemstone_plate_swipes {
         disk_size = kraken2_disk_size,
         bracken_read_len = bracken_read_len,
         bracken_classification_level = bracken_classification_level
+    }
+    call top_bracken_taxa_task.top_bracken_taxa {
+        input:
+            bracken_report = kraken2_clean.bracken_report,
+            min_abundance = 0.01
     }
   }
   if (!qc_only) {
@@ -220,6 +226,10 @@ workflow gemstone_plate_swipes {
     Float? kraken2_percent_human = kraken2_clean.kraken2_percent_human
     File? bracken_report = kraken2_clean.bracken_report
     String? bracken_version = kraken2_clean.bracken_version
+    String? bracken_most_abundant_species = top_bracken_taxa.bracken_most_abundant_species
+    String? bracken_most_abundant_genus = top_bracken_taxa.bracken_most_abundant_genus
+    String? bracken_genera_above_0_01 = top_bracken_taxa.bracken_genera
+    String? bracken_species_above_0_01 = top_bracken_taxa.bracken_species
     # Read QC - dehosting outputs
     File? read1_dehosted = read_QC_trim.read1_dehosted
     File? read2_dehosted = read_QC_trim.read2_dehosted
