@@ -38,6 +38,19 @@ qc.loc[
 genera = X.species.apply(lambda x: x.split(" ")[0]) \
     .replace({"Klebsiealla": "Klebsiella"})
 
+# Add CheckM2 and EukCC outputs if missing
+for column in [
+    "checkm2_contamination",
+    "checkm2_completeness",
+    "EukCC_contamination",
+    "EukCC_completeness"
+]:
+    
+    if not column in X.columns.to_list():
+        X = X.assign(
+            **{column: pd.NA}
+        )
+
 # Set contaminated samples to "FAIL", but ignore C. auris
 qc.loc[
     ~genera.eq("Candida") & \
