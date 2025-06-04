@@ -17,33 +17,98 @@ qc = pd.DataFrame(
     columns=qc_colnames, 
     index=X.index
 )
+
 # If the isolate fails the raw or clean read QC, it should fail global QC
-qc.loc[(X.raw_read_screen.ne("PASS") | X.clean_read_screen.ne("PASS")) 
-    & qc.qc_check.eq("PASS"), qc_colnames] = ["FAIL", "Low yield/quality", ""]
+qc.loc[
+    (
+        X.raw_read_screen.ne("PASS") | \
+        X.clean_read_screen.ne("PASS")
+    ) & qc.qc_check.eq("PASS"), 
+    qc_colnames
+] = ["FAIL", "Low yield/quality", ""]
+
 # If the isolate does not meet the minimum coverage, it should fail global QC
-qc.loc[X.est_coverage_clean.lt(args.min_coverage) 
-    & qc.qc_check.eq("PASS"), qc_colnames] = ["FAIL", "Low coverage", ""]
+qc.loc[
+    X.est_coverage_clean.lt(args.min_coverage) & \
+    qc.qc_check.eq("PASS"), 
+    qc_colnames
+] = ["FAIL", "Low coverage", ""]
 
 # Extract the genus from the species names
 genera = X.species.apply(lambda x: x.split(" ")[0]) \
     .replace({"Klebsiealla": "Klebsiella"})
 
 # Set contaminated samples to "FAIL", but ignore C. auris
-qc.loc[~genera.eq("Candida") & X.checkm2_contamination.astype(float).gt(args.max_contamination)
-    & qc.qc_check.eq("PASS"), qc_colnames] = ["FAIL", "Contamination", ""]
+qc.loc[
+    ~genera.eq("Candida") & \
+    X.checkm2_contamination.astype(float).gt(args.max_contamination) & \
+    qc.qc_check.eq("PASS"), 
+    qc_colnames
+] = ["FAIL", "Contamination", ""]
+
+# For C. auris, use EukCC contamination
+qc.loc[
+    genera.eq("Candida") & \
+    X.EukCC_contamination.astype(float).gt(args.max_contamination) & \
+    qc.qc_check.eq("PASS"), 
+    qc_colnames
+] = ["FAIL", "Contamination", ""]
 
 # Set incomplete samples to "FAIL", but ignore C. auris
-qc.loc[~genera.eq("Candida") & X.checkm2_completeness.astype(float).lt(args.min_completeness)
-    & qc.qc_check.eq("PASS"), qc_colnames] = ["FAIL", "Low completeness", ""]
+qc.loc[
+    ~genera.eq("Candida") & \
+    X.checkm2_completeness.astype(float).lt(args.min_completeness) & \
+    qc.qc_check.eq("PASS"), 
+    qc_colnames
+] = ["FAIL", "Low completeness", ""]
+
+# For C. auris, use EukCC completeness
+qc.loc[
+    genera.eq("Candida") & \
+    X.EukCC_completeness.astype(float).lt(args.min_completeness) & \
+    qc.qc_check.eq("PASS"), 
+    qc_colnames
+] = ["FAIL", "Low completeness", ""]
 
 # Compare the lab species to the GAMBIT predicted taxon
 # Extract the genus from the GAMBIT predictions
-gambit = X.gambit_predicted_taxon.apply(lambda x: x.split(" ")[0] 
-                                    if not pd.isna(x) else pd.NA)
-# Ignore missing lab predictions and Candida; in case of lab and GAMBIT predictions
+gambit = X.gambit_predicted_taxon.apply(
+    lambda x: (
+        x.split(" ")[0] 
+        if not pd.isna(x) 
+        else pd.NA
+    )
+)
+
+# Ignore missing lab predictions and C. auris; in case of lab and GAMBIT predictions
 # not matching, set the qc_flag to ALERT and set the qc_taxonomy_flag to QC_ALERT
-qc.loc[~genera.isin(["unknown", "Candida"]) & gambit.ne(genera, fill_value="nan") 
-    & qc.qc_check.eq("PASS"), qc_colnames] = ["ALERT", "Taxonomic mismatch", "QC_ALERT"]
+qc.loc[
+    ~genera.isin(["unknown", "Candida"]) & \
+    gambit.ne(genera, fill_value="nan") & \
+    qc.qc_check.eq("PASS"), 
+    qc_colnames
+] = ["ALERT", "Taxonomic mismatch", "QC_ALERT"]
+
+if (
+    "gambit_predicted_taxon" in X.columns.to_list() and \
+    "kraken2_top_taxon_name" in X.columns.to_list()
+):
+
+    # For C. auris, check the gambit and Kraken outputs
+    qc.loc[
+        genera.eq("Candida") & \
+        (
+            X.gambit_predicted_taxon.ne("Candidozyma auris", fill_value="nan") | \
+            X.kraken2_top_taxon_name.ne("Candidozyma auris", fill_value="nan")
+        ) & qc.qc_check.eq("PASS"), 
+        qc_colnames
+    ] = ["ALERT", "Taxonomic mismatch", "QC_ALERT"]
+
+else:
+
+    print(
+        "Missing C. auris columns \"gambit_predicted_taxon\" and \"kraken2_top_taxon_name\". Skipping C. auris QC evaluation..."
+    )
 
 # Samples that pass QC should not have a QC note
 qc.loc[qc.qc_check.eq("PASS"), "qc_note"] = pd.NA

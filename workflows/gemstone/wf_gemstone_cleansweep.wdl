@@ -1,10 +1,10 @@
 version 1.0
 
-import "../../tasks/cleansweep/task_cleansweep_filter.wdl" as cleansweep_filter
-import "../../tasks/cleansweep/task_cleansweep_prepare.wdl" as cleansweep_prepare
-import "../../tasks/utilities/task_cleansweep_find_straingst_references.wdl" as find_references
-import "../../tasks/alignment/task_bwa.wdl" as bwa
-import "../../tasks/quality_control/task_pilon.wdl" as pilon
+import "../../tasks/cleansweep/task_cleansweep_filter.wdl" as cleansweep_filter_task
+import "../../tasks/cleansweep/task_cleansweep_prepare.wdl" as cleansweep_prepare_task
+import "../../tasks/utilities/task_cleansweep_find_straingst_references.wdl" as find_references_task
+import "../../tasks/alignment/task_bwa.wdl" as bwa_task
+import "../../tasks/quality_control/task_pilon.wdl" as pilon_task
 
 workflow cleansweep {
     meta {
@@ -48,14 +48,14 @@ workflow cleansweep {
         Int cleansweep_cpu = 5
     }
 
-    call find_references.find_straingst_references {
+    call find_references_task.find_straingst_references {
         input:
             query_strain = query_name,
             straingst_strains = straingst_strains,
             fasta_location = fasta_location,
             fasta_extension = fasta_extension
     }
-    call cleansweep_prepare.cleansweep_prepare as prepare_straingst {
+    call cleansweep_prepare_task.cleansweep_prepare as prepare_straingst {
         input:
             samplename = samplename,
             query_reference = find_straingst_references.query_fasta,
@@ -64,7 +64,7 @@ workflow cleansweep {
             min_length = cleansweep_min_length,
             docker = cleansweep_docker
     }
-    call bwa.bwa {
+    call bwa_task.bwa {
         input:
             read1 = reads_1,
             read2 = reads_2,
@@ -78,7 +78,7 @@ workflow cleansweep {
             unpaired = alignment_unpaired,
             mismatch = alignment_mismatch
     }
-    call pilon.pilon {
+    call pilon_task.pilon {
         input:
             assembly = prepare_straingst.cleansweep_reference_fasta,
             bam = bwa.sorted_bam,
@@ -87,7 +87,7 @@ workflow cleansweep {
             fix = "bases",
             extra_options = "--nostrays --duplicates"
     }
-    call cleansweep_filter.cleansweep_filter {
+    call cleansweep_filter_task.cleansweep_filter {
         input:
             samplename = samplename,
             variants_vcf = pilon.vcf,

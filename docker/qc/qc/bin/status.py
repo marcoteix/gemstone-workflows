@@ -16,11 +16,18 @@ preferred = X[
     X.raw_read_screen.eq("PASS", fill_value="-") &
     X.clean_read_screen.eq("PASS", fill_value="-") &
     X.qc_check.eq("PASS", fill_value="-")
-].groupby(["stock_id", "straingst_top_strain"]).n50_value.idxmax() \
-    .rename("preferred_sample_id")
+].groupby(
+    ["stock_id", "straingst_top_strain"]
+).n50_value.idxmax() \
+.rename("preferred_sample_id")
 
-X = X.drop(columns="preferred_sample_id", errors="ignore") \
-    .join(preferred, on=["stock_id", "straingst_top_strain"])
+X = X.drop(
+    columns="preferred_sample_id", 
+    errors="ignore"
+).join(
+    preferred, 
+    on=["stock_id", "straingst_top_strain"]
+)
 
 # If a sample fails either raw or clean read QC, set status to fail or resequence
 fail_yield = ~(X.raw_read_screen.eq("PASS") & X.clean_read_screen.eq("PASS"))
