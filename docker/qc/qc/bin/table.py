@@ -62,7 +62,8 @@ qc.loc[
 # For C. auris, use EukCC contamination
 qc.loc[
     genera.eq("Candida") & \
-    X.EukCC_contamination.astype(float).gt(args.max_contamination) & \
+    ~X.EukCC_contamination.isna() & \
+    X.EukCC_contamination.fillna("100").astype(float).gt(args.max_contamination) & \
     qc.qc_check.eq("PASS"), 
     qc_colnames
 ] = ["FAIL", "Contamination", ""]
@@ -78,7 +79,8 @@ qc.loc[
 # For C. auris, use EukCC completeness
 qc.loc[
     genera.eq("Candida") & \
-    X.EukCC_completeness.astype(float).lt(args.min_completeness) & \
+    ~X.EukCC_completeness.isna() & \
+    X.EukCC_completeness.fillna("100").astype(float).lt(args.min_completeness) & \
     qc.qc_check.eq("PASS"), 
     qc_colnames
 ] = ["FAIL", "Low completeness", ""]
